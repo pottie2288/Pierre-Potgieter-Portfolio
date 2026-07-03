@@ -1,0 +1,17 @@
+"use client";
+
+import { MinimalistHero } from "./ui/minimalist-hero";
+
+export default function HeroSection() {
+  return (
+    <MinimalistHero
+      logoText=""
+      navLinks={[]}
+      mainText="I build brand identities for companies that care how things feel and how they are perceived over time."
+      readMoreLink="#work"
+      imageSrc="/portrait.png"
+      imageAlt="Portrait of Pierre Potgieter"
+      overlayText={{ part1: "Marketing &", part2: "Web Specialist" }}
+    />
+  );
+}

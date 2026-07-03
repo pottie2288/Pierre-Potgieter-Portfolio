@@ -1,0 +1,134 @@
+"use client";
+
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
+import { FloatingPaths } from "./background-paths";
+
+interface MinimalistHeroProps {
+  logoText: string;
+  navLinks: { label: string; href: string }[];
+  mainText: string;
+  readMoreLink: string;
+  imageSrc: string;
+  imageAlt: string;
+  overlayText: {
+    part1: string;
+    part2: string;
+  };
+  className?: string;
+}
+
+function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <a
+      href={href}
+      className="text-sm font-medium tracking-widest text-foreground/60 transition-colors hover:text-foreground"
+    >
+      {children}
+    </a>
+  );
+}
+
+export function MinimalistHero({
+  logoText,
+  navLinks,
+  mainText,
+  readMoreLink,
+  imageSrc,
+  imageAlt,
+  overlayText,
+  className,
+}: MinimalistHeroProps) {
+  return (
+    <div
+      className={cn(
+        "relative flex h-screen w-full flex-col items-center justify-between overflow-hidden bg-background p-8 font-sans md:p-12",
+        className
+      )}
+    >
+      {/* Animated background paths — behind all content */}
+      <div className="absolute inset-0 z-0">
+        <FloatingPaths position={1} />
+        <FloatingPaths position={-1} />
+      </div>
+
+      <header className="z-30 flex w-full max-w-7xl items-center justify-between">
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-xl font-bold tracking-wider"
+        >
+          {logoText}
+        </motion.div>
+        <div className="hidden items-center space-x-8 md:flex">
+          {navLinks.map((link) => (
+            <NavLink key={link.label} href={link.href}>
+              {link.label}
+            </NavLink>
+          ))}
+        </div>
+        <motion.button
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex flex-col space-y-1.5 md:hidden"
+          aria-label="Open menu"
+        >
+          <span className="block h-0.5 w-6 bg-foreground"></span>
+          <span className="block h-0.5 w-6 bg-foreground"></span>
+          <span className="block h-0.5 w-5 bg-foreground"></span>
+        </motion.button>
+      </header>
+
+      <div className="relative grid w-full max-w-7xl flex-grow grid-cols-1 items-center md:grid-cols-3">
+        {/* left column — text anchored to the bottom of its cell */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 1.2 }}
+          className="z-20 order-2 flex justify-center self-end pb-12 md:order-1 md:justify-start"
+        >
+          <h1
+            className="font-extrabold text-foreground"
+            style={{
+              fontSize: "clamp(2rem, 3.5vw, 4.5rem)",
+              lineHeight: 1.08,
+              letterSpacing: "-0.02em",
+              textShadow: "0 2px 24px rgba(0,0,0,0.55)",
+            }}
+          >
+            {overlayText.part1}
+            <br />
+            {overlayText.part2}
+          </h1>
+        </motion.div>
+
+        <div className="relative order-1 flex h-full items-center justify-center md:order-2">
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
+            className="absolute z-0 h-[380px] w-[380px] rounded-full bg-lime/90 md:h-[520px] md:w-[520px] lg:h-[640px] lg:w-[640px]"
+          >
+            {/* concentric rings */}
+            <div style={{ position: "absolute", inset: "8%",  borderRadius: "50%", background: "#141414" }} />
+            <div style={{ position: "absolute", inset: "16%", borderRadius: "50%", background: "#a9a9a9" }} />
+            <div style={{ position: "absolute", inset: "24%", borderRadius: "50%", background: "#f2f2f2" }} />
+          </motion.div>
+          <motion.img
+            src={imageSrc}
+            alt={imageAlt}
+            className="relative z-10 w-72 scale-150 object-cover md:w-80 lg:w-[24rem]"
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.4 }}
+          />
+        </div>
+
+        {/* right column intentionally empty */}
+        <div className="order-3" />
+      </div>
+    </div>
+  );
+}

@@ -1,26 +1,1104 @@
 @import "tailwindcss";
 
+/* ============================
+   CUSTOM PROPERTIES
+   ============================ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --outer-space:   #141414;
+  --white-smoke:   #f2f2f2;
+  --lime:          #cfff6a;
+  --lime-dim:      #b8e85e;
+  --grey:          #a9a9a9;
+  --mid:           #2f2f2f;
+  --border:        rgba(242, 242, 242, 0.10);
+  --border-strong: rgba(242, 242, 242, 0.18);
+
+  --font-outfit:  var(--font-outfit);
+  --font-mono:    var(--font-dm-mono);
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out:   cubic-bezier(0.76, 0, 0.24, 1);
+
+  --logo-chip-size: clamp(34px, 2.6vw, 40px);
 }
 
+/* Bridges shadcn-style Tailwind utilities (bg-background, text-foreground,
+   font-sans) onto this site's existing brand tokens, so components built
+   for the shadcn convention stay on-brand instead of pulling in defaults. */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: var(--outer-space);
+  --color-foreground: var(--white-smoke);
+  --color-lime: var(--lime);
+  --color-border: var(--border);
+  --color-card: #1a1a1a;
+  --color-muted-foreground: var(--grey);
+  --color-secondary: var(--mid);
+  --color-secondary-foreground: var(--white-smoke);
+  --font-sans: var(--font-outfit);
+  --font-mono: var(--font-dm-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ============================
+   RESET & BASE
+   ============================ */
+
+html {
+  background: var(--outer-space);
+  color: var(--white-smoke);
+  font-family: var(--font-outfit), system-ui, sans-serif;
+  scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--outer-space);
+  min-height: 100dvh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: var(--lime); color: var(--outer-space); }
+
+img { display: block; max-width: 100%; }
+
+a { color: inherit; text-decoration: none; }
+
+/* ============================
+   TYPOGRAPHY SCALE (vw-based like produx)
+   ============================ */
+.text-display {
+  font-family: var(--font-outfit), sans-serif;
+  font-size: clamp(40px, 5.5vw, 88px);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+}
+
+.text-heading {
+  font-family: var(--font-outfit), sans-serif;
+  font-size: clamp(28px, 3.5vw, 56px);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+}
+
+.text-mono {
+  font-family: var(--font-mono), monospace;
+  font-size: clamp(11px, 0.9vw, 14px);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ============================
+   KEYFRAMES
+   ============================ */
+
+/* Split text reveal (words slide up) */
+@keyframes split-up {
+  from { transform: translateY(110%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* Hero line clip-reveal */
+@keyframes hero-line-up {
+  from { transform: translateY(105%); }
+  to   { transform: translateY(0); }
+}
+
+/* Status dot blink */
+@keyframes blink-dot {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.25; }
+}
+
+/* Subtle slide-in from left */
+@keyframes slide-from-left {
+  from { opacity: 0; transform: translateX(-20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Fade in */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Fade up */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Horizontal ticker / marquee */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* Scale up hero image box */
+@keyframes hero-expand {
+  from { transform: scale(0.72); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+
+/* Border draw */
+@keyframes border-draw {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0% 0 0); }
+}
+
+/* Scroll indicator bob */
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(6px); }
+}
+
+/* ============================
+   SPLIT TEXT UTILITY
+   ============================ */
+.split-word-wrap {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+}
+
+.split-word {
+  display: inline-block;
+  transform: translateY(110%);
+  opacity: 0;
+}
+
+.split-word.revealed {
+  animation: split-up 0.9s var(--ease-out-expo) forwards;
+}
+
+/* ============================
+   NAVBAR
+   ============================ */
+.navbar-shell {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.navbar-shell > * { pointer-events: auto; }
+
+/* Frosted backdrop that fades in once the page is scrolled, so the bar
+   stays legible over photos/cards instead of relying on the difference
+   blend alone. Lives on the shell (behind .navbar) so it also becomes
+   part of the backdrop .navbar's mix-blend-mode reads against. */
+.navbar-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 20, 20, 0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 1px 0 rgba(242, 242, 242, 0.06);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.navbar-shell.scrolled::before { opacity: 1; }
+
+.navbar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: clamp(16px, 4vh, 36px) clamp(20px, 5.5vw, 72px);
+  mix-blend-mode: difference;
+  transition: padding 0.4s ease;
+}
+
+.navbar-shell.scrolled .navbar {
+  padding-top: clamp(12px, 2.4vh, 20px);
+  padding-bottom: clamp(12px, 2.4vh, 20px);
+}
+
+/* Sits outside the mix-blend-mode box so the mark always reads in its
+   natural colors instead of inverting against whatever is behind it. */
+.navbar-logo-chip {
+  position: absolute;
+  top: clamp(16px, 4vh, 36px);
+  left: clamp(20px, 5.5vw, 72px);
+  width: var(--logo-chip-size);
+  height: var(--logo-chip-size);
+  border-radius: 10px;
+  background: var(--white-smoke);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.35);
+  transition: top 0.4s ease;
+}
+
+.navbar-shell.scrolled .navbar-logo-chip {
+  top: clamp(12px, 2.4vh, 20px);
+}
+
+.navbar-logo {
+  font-family: var(--font-outfit), sans-serif;
+  font-size: clamp(18px, 1.8vw, 26px);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--white-smoke);
+  white-space: nowrap;
+}
+
+.navbar-logo-spacer {
+  width: var(--logo-chip-size);
+  flex-shrink: 0;
+}
+
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: clamp(20px, 3vw, 48px);
+  list-style: none;
+}
+
+.navbar-links a {
+  font-family: var(--font-mono), monospace;
+  font-size: clamp(10px, 0.85vw, 13px);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--white-smoke);
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.navbar-links a:hover { opacity: 1; }
+
+/* ── name hover effect ──────────────────────────────────────────────────────── */
+.name-hover {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* base text — stays as normal white, provides layout size */
+.name-hover-actual {
+  display: inline;
+}
+
+/* gradient overlay — sits on top, clips to 0 width until hover */
+.name-hover-front {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0%;
+  overflow: hidden;
+  white-space: nowrap;
+  background: linear-gradient(90deg, #cfff6a, #03a9f4, #f441a5, #ffeb3b, #cfff6a);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  background-size: 300%;
+  animation: name-gradient 8s linear infinite;
+  border-bottom: 1.5px solid transparent;
+  transition: width 0.75s ease, border-color 0.75s ease;
+  /* font must match parent exactly so overlay aligns glyph-for-glyph */
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+}
+
+.name-hover:hover .name-hover-front {
+  width: 100%;
+  border-bottom-color: #cfff6a;
+}
+
+@keyframes name-gradient {
+  0%   { background-position: 0%; }
+  50%  { background-position: 300%; }
+  100% { background-position: 0%; }
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.navbar-cta {
+  font-family: var(--font-mono), monospace;
+  font-size: clamp(10px, 0.85vw, 13px);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--outer-space);
+  background: var(--white-smoke);
+  padding: 8px 18px;
+  border-radius: 999px;
+}
+
+.navbar-instagram {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.navbar-instagram:hover {
+  transform: scale(1.1);
+  opacity: 0.9;
+}
+
+.navbar-instagram-icon {
+  display: block;
+  width: clamp(26px, 2vw, 32px);
+  height: clamp(26px, 2vw, 32px);
+  border-radius: 8px;
+}
+
+/* ============================
+   HERO
+   ============================ */
+.hero-section {
+  position: relative;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0 clamp(20px, 5.5vw, 72px) clamp(40px, 6vh, 72px);
+  overflow: hidden;
+}
+
+.hero-top-row {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: clamp(80px, 14vh, 140px) clamp(20px, 5.5vw, 72px) 0;
+}
+
+.hero-tag {
+  font-family: var(--font-mono), monospace;
+  font-size: clamp(10px, 0.85vw, 13px);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--white-smoke);
+  opacity: 0.55;
+}
+
+.hero-statement {
+  font-family: var(--font-outfit), sans-serif;
+  font-size: clamp(16px, 1.6vw, 24px);
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--grey);
+  max-width: min(580px, 42vw);
+  text-align: right;
+}
+
+.hero-image-box {
+  position: relative;
+  width: 100%;
+  max-width: min(900px, 69.4vw);
+  aspect-ratio: 16/9;
+  margin: 0 auto 48px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--mid);
+  transform: scale(0.78);
+  opacity: 0;
+}
+
+.hero-image-box.revealed {
+  animation: hero-expand 1.2s var(--ease-out-expo) 0.3s forwards;
+}
+
+.hero-headline {
+  font-family: var(--font-outfit), sans-serif;
+  font-size: clamp(36px, 5.5vw, 88px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--white-smoke);
+}
+
+.hero-bottom-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-top: clamp(24px, 3vh, 40px);
+}
+
+.hero-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono), monospace;
+  font-size: clamp(11px, 0.9vw, 13px);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--outer-space);
+  background: var(--white-smoke);
+  border-radius: 999px;
+  padding: 12px 24px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.hero-cta-btn:hover { background: var(--lime); }
+
+.hero-tagline {
+  font-family: var(--font-outfit), sans-serif;
+  font-size: clamp(13px, 1.1vw, 17px);
+  color: var(--white-smoke);
+  opacity: 0.45;
+  font-style: italic;
+}
+
+/* ============================
+   SECTION SHARED
+   ============================ */
+.section {
+  padding: clamp(64px, 10vh, 120px) clamp(20px, 5.5vw, 72px);
+}
+
+.section-label {
+  font-family: var(--font-mono), monospace;
+  font-size: clamp(10px, 0.83vw, 12px);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--grey);
+  margin-bottom: 48px;
+}
+
+.section-heading {
+  font-family: var(--font-outfit), sans-serif;
+  font-size: clamp(36px, 5vw, 72px);
+  font-weight: 700;
+  text-align: center;
+  color: var(--white-smoke);
+  margin-bottom: 48px;
+}
+
+/* ============================
+   SERVICES
+   ============================ */
+.services-list {
+  border-top: 1px solid var(--border);
+}
+
+.service-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 32px;
+  padding: clamp(24px, 3.5vh, 44px) 0;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.2s;
+  cursor: default;
+}
+
+.service-row:hover { background: rgba(242,242,242,0.02); }
+
+.service-num {
+  font-family: var(--font-mono), monospace;
+  font-size: clamp(10px, 0.83vw, 12px);
+  letter-spacing: 0.1em;
+  color: var(--grey);
+  min-width: 28px;
+  padding-top: 4px;
+}
+
+.service-name {
+  font-family: var(--font-outfit), sans-serif;
+  font-size: clamp(22px, 2.8vw, 44px);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: var(--white-smoke);
+  flex: 1;
+  line-height: 1.1;
+}
+
+.service-desc {
+  font-size: clamp(13px, 1vw, 15px);
+  color: var(--grey);
+  line-height: 1.6;
+  max-width: 340px;
+  padding-top: 8px;
+}
+
+/* ============================
+   VALUE PROP
+   ============================ */
+.value-section {
+  padding: clamp(64px, 10vh, 120px) clamp(20px, 5.5vw, 72px);
+  text-align: center;
+}
+
+.value-headline {
+  font-family: var(--font-outfit), sans-serif;
+  font-size: clamp(28px, 4.5vw, 72px);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  color: var(--white-smoke);
+  max-width: min(860px, 80vw);
+  margin: 0 auto 64px;
+}
+
+.value-highlight { color: var(--lime); }
+
+.value-cols {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+@media (max-width: 640px) {
+  .value-cols { grid-template-columns: 1fr; }
+}
+
+.value-col {
+  background: var(--outer-space);
+  padding: clamp(28px, 3.5vw, 48px);
+  text-align: left;
+}
+
+.value-col-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: rgba(207, 255, 106, 0.1);
+  border: 1px solid rgba(207,255,106,0.2);
+  display: grid;
+  place-items: center;
+  margin-bottom: 20px;
+  font-size: 16px;
+}
+
+.value-col-title {
+  font-family: var(--font-outfit), sans-serif;
+  font-size: clamp(16px, 1.3vw, 20px);
+  font-weight: 600;
+  color: var(--white-smoke);
+  margin-bottom: 8px;
+  letter-spacing: -0.015em;
+}
+
+.value-col-desc {
+  font-size: clamp(13px, 0.95vw, 15px);
+  color: var(--grey);
+  line-height: 1.6;
+}
+
+/* ============================
+   PHILOSOPHY
+   ============================ */
+.philosophy-section {
+  padding: clamp(64px, 10vh, 120px) 0;
+  overflow: hidden;
+  border-top: 1px solid var(--border);
+}
+
+.philosophy-marquee-row {
+  display: flex;
+  overflow: hidden;
+  margin-bottom: clamp(4px, 0.6vw, 10px);
+}
+
+.philosophy-text {
+  display: flex;
+  width: max-content;
+  animation: marquee 40s linear infinite;
+}
+
+.philosophy-text.reverse {
+  animation-direction: reverse;
+  animation-duration: 50s;
+}
+
+.philosophy-word {
+  font-family: var(--font-outfit), sans-serif;
+  font-size: clamp(32px, 5.5vw, 88px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+  padding: 0 clamp(12px, 1.5vw, 24px);
+}
+
+.philosophy-word.dark { color: rgba(242,242,242,0.08); }
+.philosophy-word.light { color: var(--white-smoke); }
+.philosophy-word.accent { color: var(--lime); }
+
+.philosophy-body {
+  padding: clamp(40px, 5vw, 72px) clamp(20px, 5.5vw, 72px) 0;
+  max-width: min(680px, 90vw);
+  margin: 0 auto;
+  text-align: center;
+}
+
+.philosophy-body p {
+  font-size: clamp(16px, 1.4vw, 20px);
+  color: var(--grey);
+  line-height: 1.7;
+}
+
+/* ============================
+   FOOTER
+   ============================ */
+.footer {
+  border-top: 1px solid var(--border);
+  padding: clamp(48px, 7vh, 96px) clamp(20px, 5.5vw, 72px);
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 48px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .footer { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 560px) {
+  .footer { grid-template-columns: 1fr; }
+}
+
+.footer-brand {
+  font-family: var(--font-outfit), sans-serif;
+  font-size: clamp(18px, 1.5vw, 24px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--white-smoke);
+  margin-bottom: 12px;
+}
+
+.footer-tagline {
+  font-size: clamp(13px, 0.95vw, 15px);
+  color: var(--grey);
+  line-height: 1.5;
+  max-width: 280px;
+}
+
+.footer-col-title {
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--grey);
+  margin-bottom: 16px;
+}
+
+.footer-links {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.footer-links a {
+  font-size: clamp(13px, 0.95vw, 15px);
+  color: var(--white-smoke);
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.footer-links a:hover { opacity: 1; }
+
+.footer-bottom {
+  border-top: 1px solid var(--border);
+  padding: 20px clamp(20px, 5.5vw, 72px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.footer-copy {
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--grey);
+}
+
+/* ============================
+   REVEAL UTILITY
+   ============================ */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.8s var(--ease-out-expo), transform 0.8s var(--ease-out-expo);
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* ============================
+   RUNNER GAME
+   ============================ */
+.runner-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  padding: 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.runner-label {
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--grey);
+  padding: clamp(24px, 4vh, 40px) 0 clamp(14px, 2vh, 24px);
+}
+
+.runner-canvas {
+  width: 100%;
+  height: clamp(300px, 38vh, 440px);
+  display: block;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.runner-hint {
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(169,169,169,0.4);
+  padding: clamp(14px, 2vh, 24px) 0 clamp(24px, 4vh, 40px);
+}
+
+/* ============================
+   MARIO DECORATIVE BAR
+   ============================ */
+.mario-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100px 0 40px;
+  gap: 0;
+  overflow: visible;
+  line-height: 0;
+  font-size: 0;
+}
+
+.brick {
+  height: 2px;
+  width: 2px;
+  box-shadow: 2px 2px 0px #ff9999, 4px 2px 0px #ff9999, 6px 2px 0px #ff9999,
+    8px 2px 0px #ff9999, 10px 2px 0px #ff9999, 12px 2px 0px #ff9999,
+    14px 2px 0px #ff9999, 16px 2px 0px #ff9999, 18px 2px 0px #ff9999,
+    20px 2px 0px #ff9999, 22px 2px 0px #ff9999, 24px 2px 0px #ff9999,
+    26px 2px 0px #ff9999, 28px 2px 0px #ff9999, 30px 2px 0px #ff9999,
+    32px 2px 0px #ff9999, 2px 4px 0px #cc3300, 4px 4px 0px #cc3300,
+    6px 4px 0px #cc3300, 8px 4px 0px #cc3300, 10px 4px 0px #cc3300,
+    12px 4px 0px #cc3300, 14px 4px 0px #cc3300, 16px 4px 0px #000,
+    18px 4px 0px #cc3300, 20px 4px 0px #cc3300, 22px 4px 0px #cc3300,
+    24px 4px 0px #cc3300, 26px 4px 0px #cc3300, 28px 4px 0px #cc3300,
+    30px 4px 0px #cc3300, 32px 4px 0px #000, 2px 6px 0px #cc3300,
+    4px 6px 0px #cc3300, 6px 6px 0px #cc3300, 8px 6px 0px #cc3300,
+    10px 6px 0px #cc3300, 12px 6px 0px #cc3300, 14px 6px 0px #cc3300,
+    16px 6px 0px #000, 18px 6px 0px #cc3300, 20px 6px 0px #cc3300,
+    22px 6px 0px #cc3300, 24px 6px 0px #cc3300, 26px 6px 0px #cc3300,
+    28px 6px 0px #cc3300, 30px 6px 0px #cc3300, 32px 6px 0px #000,
+    2px 8px 0px #000, 4px 8px 0px #000, 6px 8px 0px #000, 8px 8px 0px #000,
+    10px 8px 0px #000, 12px 8px 0px #000, 14px 8px 0px #000, 16px 8px 0px #000,
+    18px 8px 0px #000, 20px 8px 0px #000, 22px 8px 0px #000, 24px 8px 0px #000,
+    26px 8px 0px #000, 28px 8px 0px #000, 30px 8px 0px #000, 32px 8px 0px #000,
+    2px 10px 0px #cc3300, 4px 10px 0px #cc3300, 6px 10px 0px #cc3300,
+    8px 10px 0px #000, 10px 10px 0px #cc3300, 12px 10px 0px #cc3300,
+    14px 10px 0px #cc3300, 16px 10px 0px #cc3300, 18px 10px 0px #cc3300,
+    20px 10px 0px #cc3300, 22px 10px 0px #cc3300, 24px 10px 0px #000,
+    26px 10px 0px #cc3300, 28px 10px 0px #cc3300, 30px 10px 0px #cc3300,
+    32px 10px 0px #cc3300, 2px 12px 0px #cc3300, 4px 12px 0px #cc3300,
+    6px 12px 0px #cc3300, 8px 12px 0px #000, 10px 12px 0px #cc3300,
+    12px 12px 0px #cc3300, 14px 12px 0px #cc3300, 16px 12px 0px #cc3300,
+    18px 12px 0px #cc3300, 20px 12px 0px #cc3300, 22px 12px 0px #cc3300,
+    24px 12px 0px #000, 26px 12px 0px #cc3300, 28px 12px 0px #cc3300,
+    30px 12px 0px #cc3300, 32px 12px 0px #cc3300, 2px 14px 0px #cc3300,
+    4px 14px 0px #cc3300, 6px 14px 0px #cc3300, 8px 14px 0px #000,
+    10px 14px 0px #cc3300, 12px 14px 0px #cc3300, 14px 14px 0px #cc3300,
+    16px 14px 0px #cc3300, 18px 14px 0px #cc3300, 20px 14px 0px #cc3300,
+    22px 14px 0px #cc3300, 24px 14px 0px #000, 26px 14px 0px #cc3300,
+    28px 14px 0px #cc3300, 30px 14px 0px #cc3300, 32px 14px 0px #cc3300,
+    2px 16px 0px #000, 4px 16px 0px #000, 6px 16px 0px #000, 8px 16px 0px #000,
+    10px 16px 0px #000, 12px 16px 0px #000, 14px 16px 0px #000,
+    16px 16px 0px #000, 18px 16px 0px #000, 20px 16px 0px #000,
+    22px 16px 0px #000, 24px 16px 0px #000, 26px 16px 0px #000,
+    28px 16px 0px #000, 30px 16px 0px #000, 32px 16px 0px #000,
+    2px 18px 0px #cc3300, 4px 18px 0px #cc3300, 6px 18px 0px #cc3300,
+    8px 18px 0px #cc3300, 10px 18px 0px #cc3300, 12px 18px 0px #cc3300,
+    14px 18px 0px #cc3300, 16px 18px 0px #000, 18px 18px 0px #cc3300,
+    20px 18px 0px #cc3300, 22px 18px 0px #cc3300, 24px 18px 0px #cc3300,
+    26px 18px 0px #cc3300, 28px 18px 0px #cc3300, 30px 18px 0px #cc3300,
+    32px 18px 0px #000, 2px 20px 0px #cc3300, 4px 20px 0px #cc3300,
+    6px 20px 0px #cc3300, 8px 20px 0px #cc3300, 10px 20px 0px #cc3300,
+    12px 20px 0px #cc3300, 14px 20px 0px #cc3300, 16px 20px 0px #000,
+    18px 20px 0px #cc3300, 20px 20px 0px #cc3300, 22px 20px 0px #cc3300,
+    24px 20px 0px #cc3300, 26px 20px 0px #cc3300, 28px 20px 0px #cc3300,
+    30px 20px 0px #cc3300, 32px 20px 0px #000, 2px 22px 0px #cc3300,
+    4px 22px 0px #cc3300, 6px 22px 0px #cc3300, 8px 22px 0px #cc3300,
+    10px 22px 0px #cc3300, 12px 22px 0px #cc3300, 14px 22px 0px #cc3300,
+    16px 22px 0px #000, 18px 22px 0px #cc3300, 20px 22px 0px #cc3300,
+    22px 22px 0px #cc3300, 24px 22px 0px #cc3300, 26px 22px 0px #cc3300,
+    28px 22px 0px #cc3300, 30px 22px 0px #cc3300, 32px 22px 0px #000,
+    2px 24px 0px #000, 4px 24px 0px #000, 6px 24px 0px #000, 8px 24px 0px #000,
+    10px 24px 0px #000, 12px 24px 0px #000, 14px 24px 0px #000,
+    16px 24px 0px #000, 18px 24px 0px #000, 20px 24px 0px #000,
+    22px 24px 0px #000, 24px 24px 0px #000, 26px 24px 0px #000,
+    28px 24px 0px #000, 30px 24px 0px #000, 32px 24px 0px #000,
+    2px 26px 0px #cc3300, 4px 26px 0px #cc3300, 6px 26px 0px #cc3300,
+    8px 26px 0px #000, 10px 26px 0px #cc3300, 12px 26px 0px #cc3300,
+    14px 26px 0px #cc3300, 16px 26px 0px #cc3300, 18px 26px 0px #cc3300,
+    20px 26px 0px #cc3300, 22px 26px 0px #cc3300, 24px 26px 0px #000,
+    26px 26px 0px #cc3300, 28px 26px 0px #cc3300, 30px 26px 0px #cc3300,
+    32px 26px 0px #cc3300, 2px 28px 0px #cc3300, 4px 28px 0px #cc3300,
+    6px 28px 0px #cc3300, 8px 28px 0px #000, 10px 28px 0px #cc3300,
+    12px 28px 0px #cc3300, 14px 28px 0px #cc3300, 16px 28px 0px #cc3300,
+    18px 28px 0px #cc3300, 20px 28px 0px #cc3300, 22px 28px 0px #cc3300,
+    24px 28px 0px #000, 26px 28px 0px #cc3300, 28px 28px 0px #cc3300,
+    30px 28px 0px #cc3300, 32px 28px 0px #cc3300, 2px 30px 0px #cc3300,
+    4px 30px 0px #cc3300, 6px 30px 0px #cc3300, 8px 30px 0px #000,
+    10px 30px 0px #cc3300, 12px 30px 0px #cc3300, 14px 30px 0px #cc3300,
+    16px 30px 0px #cc3300, 18px 30px 0px #cc3300, 20px 30px 0px #cc3300,
+    22px 30px 0px #cc3300, 24px 30px 0px #000, 26px 30px 0px #cc3300,
+    28px 30px 0px #cc3300, 30px 30px 0px #cc3300, 32px 30px 0px #cc3300,
+    2px 32px 0px #000, 4px 32px 0px #000, 6px 32px 0px #000, 8px 32px 0px #000,
+    10px 32px 0px #000, 12px 32px 0px #000, 14px 32px 0px #000,
+    16px 32px 0px #000, 18px 32px 0px #000, 20px 32px 0px #000,
+    22px 32px 0px #000, 24px 32px 0px #000, 26px 32px 0px #000,
+    28px 32px 0px #000, 30px 32px 0px #000, 32px 32px 0px #000;
+}
+
+.brick.one {
+  transform: translateX(-50px);
+}
+
+.brick.two {
+  margin-top: -2px;
+  transform: translateX(14px);
+}
+
+.tooltip-mario-container {
+  height: 2px;
+  width: 2px;
+  position: relative;
+  box-shadow: 4px 2px 0px #ce3100, 6px 2px 0px #ce3100, 8px 2px 0px #ce3100,
+    10px 2px 0px #ce3100, 12px 2px 0px #ce3100, 14px 2px 0px #ce3100,
+    16px 2px 0px #ce3100, 18px 2px 0px #ce3100, 20px 2px 0px #ce3100,
+    22px 2px 0px #ce3100, 24px 2px 0px #ce3100, 26px 2px 0px #ce3100,
+    28px 2px 0px #ce3100, 30px 2px 0px #ce3100, 2px 4px 0px #ce3100,
+    4px 4px 0px #ff9c31, 6px 4px 0px #ff9c31, 8px 4px 0px #ff9c31,
+    10px 4px 0px #ff9c31, 12px 4px 0px #ff9c31, 14px 4px 0px #ff9c31,
+    16px 4px 0px #ff9c31, 18px 4px 0px #ff9c31, 20px 4px 0px #ff9c31,
+    22px 4px 0px #ff9c31, 24px 4px 0px #ff9c31, 26px 4px 0px #ff9c31,
+    28px 4px 0px #ff9c31, 30px 4px 0px #ff9c31, 32px 4px 0px #000,
+    2px 6px 0px #ce3100, 4px 6px 0px #ff9c31, 6px 6px 0px #000,
+    8px 6px 0px #ff9c31, 10px 6px 0px #ff9c31, 12px 6px 0px #ff9c31,
+    14px 6px 0px #ff9c31, 16px 6px 0px #ff9c31, 18px 6px 0px #ff9c31,
+    20px 6px 0px #ff9c31, 22px 6px 0px #ff9c31, 24px 6px 0px #ff9c31,
+    26px 6px 0px #ff9c31, 28px 6px 0px #000, 30px 6px 0px #ff9c31,
+    32px 6px 0px #000, 2px 8px 0px #ce3100, 4px 8px 0px #ff9c31,
+    6px 8px 0px #ff9c31, 8px 8px 0px #ff9c31, 10px 8px 0px #ff9c31,
+    12px 8px 0px #ce3100, 14px 8px 0px #ce3100, 16px 8px 0px #ce3100,
+    18px 8px 0px #ce3100, 20px 8px 0px #ce3100, 22px 8px 0px #ff9c31,
+    24px 8px 0px #ff9c31, 26px 8px 0px #ff9c31, 28px 8px 0px #ff9c31,
+    30px 8px 0px #ff9c31, 32px 8px 0px #000, 2px 10px 0px #ce3100,
+    4px 10px 0px #ff9c31, 6px 10px 0px #ff9c31, 8px 10px 0px #ff9c31,
+    10px 10px 0px #ce3100, 12px 10px 0px #ce3100, 14px 10px 0px #000,
+    16px 10px 0px #000, 18px 10px 0px #000, 20px 10px 0px #ce3100,
+    22px 10px 0px #ce3100, 24px 10px 0px #ff9c31, 26px 10px 0px #ff9c31,
+    28px 10px 0px #ff9c31, 30px 10px 0px #ff9c31, 32px 10px 0px #000,
+    2px 12px 0px #ce3100, 4px 12px 0px #ff9c31, 6px 12px 0px #ff9c31,
+    8px 12px 0px #ff9c31, 10px 12px 0px #ce3100, 12px 12px 0px #ce3100,
+    14px 12px 0px #000, 16px 12px 0px #ff9c31, 18px 12px 0px #ff9c31,
+    20px 12px 0px #ce3100, 22px 12px 0px #ce3100, 24px 12px 0px #000,
+    26px 12px 0px #ff9c31, 28px 12px 0px #ff9c31, 30px 12px 0px #ff9c31,
+    32px 12px 0px #000, 2px 14px 0px #ce3100, 4px 14px 0px #ff9c31,
+    6px 14px 0px #ff9c31, 8px 14px 0px #ff9c31, 10px 14px 0px #ce3100,
+    12px 14px 0px #ce3100, 14px 14px 0px #000, 16px 14px 0px #ff9c31,
+    18px 14px 0px #ff9c31, 20px 14px 0px #ce3100, 22px 14px 0px #ce3100,
+    24px 14px 0px #000, 26px 14px 0px #ff9c31, 28px 14px 0px #ff9c31,
+    30px 14px 0px #ff9c31, 32px 14px 0px #000, 2px 16px 0px #ce3100,
+    4px 16px 0px #ff9c31, 6px 16px 0px #ff9c31, 8px 16px 0px #ff9c31,
+    10px 16px 0px #ff9c31, 12px 16px 0px #000, 14px 16px 0px #000,
+    16px 16px 0px #ff9c31, 18px 16px 0px #ce3100, 20px 16px 0px #ce3100,
+    22px 16px 0px #ce3100, 24px 16px 0px #000, 26px 16px 0px #ff9c31,
+    28px 16px 0px #ff9c31, 30px 16px 0px #ff9c31, 32px 16px 0px #000,
+    2px 18px 0px #ce3100, 4px 18px 0px #ff9c31, 6px 18px 0px #ff9c31,
+    8px 18px 0px #ff9c31, 10px 18px 0px #ff9c31, 12px 18px 0px #ff9c31,
+    14px 18px 0px #ff9c31, 16px 18px 0px #ce3100, 18px 18px 0px #ce3100,
+    20px 18px 0px #000, 22px 18px 0px #000, 24px 18px 0px #000,
+    26px 18px 0px #ff9c31, 28px 18px 0px #ff9c31, 30px 18px 0px #ff9c31,
+    32px 18px 0px #000, 2px 20px 0px #ce3100, 4px 20px 0px #ff9c31,
+    6px 20px 0px #ff9c31, 8px 20px 0px #ff9c31, 10px 20px 0px #ff9c31,
+    12px 20px 0px #ff9c31, 14px 20px 0px #ff9c31, 16px 20px 0px #ce3100,
+    18px 20px 0px #ce3100, 20px 20px 0px #000, 22px 20px 0px #ff9c31,
+    24px 20px 0px #ff9c31, 26px 20px 0px #ff9c31, 28px 20px 0px #ff9c31,
+    30px 20px 0px #ff9c31, 32px 20px 0px #000, 2px 22px 0px #ce3100,
+    4px 22px 0px #ff9c31, 6px 22px 0px #ff9c31, 8px 22px 0px #ff9c31,
+    10px 22px 0px #ff9c31, 12px 22px 0px #ff9c31, 14px 22px 0px #ff9c31,
+    16px 22px 0px #ff9c31, 18px 22px 0px #000, 20px 22px 0px #000,
+    22px 22px 0px #ff9c31, 24px 22px 0px #ff9c31, 26px 22px 0px #ff9c31,
+    28px 22px 0px #ff9c31, 30px 22px 0px #ff9c31, 32px 22px 0px #000,
+    2px 24px 0px #ce3100, 4px 24px 0px #ff9c31, 6px 24px 0px #ff9c31,
+    8px 24px 0px #ff9c31, 10px 24px 0px #ff9c31, 12px 24px 0px #ff9c31,
+    14px 24px 0px #ff9c31, 16px 24px 0px #ce3100, 18px 24px 0px #ce3100,
+    20px 24px 0px #ff9c31, 22px 24px 0px #ff9c31, 24px 24px 0px #ff9c31,
+    26px 24px 0px #ff9c31, 28px 24px 0px #ff9c31, 30px 24px 0px #ff9c31,
+    32px 24px 0px #000, 2px 26px 0px #ce3100, 4px 26px 0px #ff9c31,
+    6px 26px 0px #ff9c31, 8px 26px 0px #ff9c31, 10px 26px 0px #ff9c31,
+    12px 26px 0px #ff9c31, 14px 26px 0px #ff9c31, 16px 26px 0px #ce3100,
+    18px 26px 0px #ce3100, 20px 26px 0px #000, 22px 26px 0px #ff9c31,
+    24px 26px 0px #ff9c31, 26px 26px 0px #ff9c31, 28px 26px 0px #ff9c31,
+    30px 26px 0px #ff9c31, 32px 26px 0px #000, 2px 28px 0px #ce3100,
+    4px 28px 0px #ff9c31, 6px 28px 0px #000, 8px 28px 0px #ff9c31,
+    10px 28px 0px #ff9c31, 12px 28px 0px #ff9c31, 14px 28px 0px #ff9c31,
+    16px 28px 0px #ff9c31, 18px 28px 0px #000, 20px 28px 0px #000,
+    22px 28px 0px #ff9c31, 24px 28px 0px #ff9c31, 26px 28px 0px #ff9c31,
+    28px 28px 0px #000, 30px 28px 0px #ff9c31, 32px 28px 0px #000,
+    2px 30px 0px #ce3100, 4px 30px 0px #ff9c31, 6px 30px 0px #ff9c31,
+    8px 30px 0px #ff9c31, 10px 30px 0px #ff9c31, 12px 30px 0px #ff9c31,
+    14px 30px 0px #ff9c31, 16px 30px 0px #ff9c31, 18px 30px 0px #ff9c31,
+    20px 30px 0px #ff9c31, 22px 30px 0px #ff9c31, 24px 30px 0px #ff9c31,
+    26px 30px 0px #ff9c31, 28px 30px 0px #ff9c31, 30px 30px 0px #ff9c31,
+    32px 30px 0px #000, 2px 32px 0px #000, 4px 32px 0px #000, 6px 32px 0px #000,
+    8px 32px 0px #000, 10px 32px 0px #000, 12px 32px 0px #000,
+    14px 32px 0px #000, 16px 32px 0px #000, 18px 32px 0px #000,
+    20px 32px 0px #000, 22px 32px 0px #000, 24px 32px 0px #000,
+    26px 32px 0px #000, 28px 32px 0px #000, 30px 32px 0px #000,
+    32px 32px 0px #000;
+  margin-top: -2px;
+  transform: translate(-18px);
+  z-index: 3;
+}
+
+.box {
+  position: absolute;
+  background-color: transparent;
+  z-index: 3;
+  width: 34px;
+  height: 34px;
+  cursor: pointer;
+}
+
+.mush {
+  height: 2px;
+  width: 2px;
+  box-shadow: 14px 2px 0px #fc9838, 16px 2px 0px #fc9838, 18px 2px 0px #fc9838,
+    20px 2px 0px #fc9838, 12px 4px 0px #fc9838, 14px 4px 0px #fc9838,
+    16px 4px 0px #fc9838, 18px 4px 0px #fc9838, 20px 4px 0px #d82800,
+    22px 4px 0px #d82800, 10px 6px 0px #fc9838, 12px 6px 0px #fc9838,
+    14px 6px 0px #fc9838, 16px 6px 0px #fc9838, 18px 6px 0px #d82800,
+    20px 6px 0px #d82800, 22px 6px 0px #d82800, 24px 6px 0px #d82800,
+    8px 8px 0px #fc9838, 10px 8px 0px #fc9838, 12px 8px 0px #fc9838,
+    14px 8px 0px #fc9838, 16px 8px 0px #fc9838, 18px 8px 0px #d82800,
+    20px 8px 0px #d82800, 22px 8px 0px #d82800, 24px 8px 0px #d82800,
+    26px 8px 0px #d82800, 6px 10px 0px #fc9838, 8px 10px 0px #fc9838,
+    10px 10px 0px #fc9838, 12px 10px 0px #fc9838, 14px 10px 0px #fc9838,
+    16px 10px 0px #fc9838, 18px 10px 0px #fc9838, 20px 10px 0px #d82800,
+    22px 10px 0px #d82800, 24px 10px 0px #d82800, 26px 10px 0px #fc9838,
+    28px 10px 0px #fc9838, 4px 12px 0px #fc9838, 6px 12px 0px #fc9838,
+    8px 12px 0px #d82800, 10px 12px 0px #d82800, 12px 12px 0px #d82800,
+    14px 12px 0px #fc9838, 16px 12px 0px #fc9838, 18px 12px 0px #fc9838,
+    20px 12px 0px #fc9838, 22px 12px 0px #fc9838, 24px 12px 0px #fc9838,
+    26px 12px 0px #fc9838, 28px 12px 0px #fc9838, 30px 12px 0px #fc9838,
+    4px 14px 0px #fc9838, 6px 14px 0px #d82800, 8px 14px 0px #d82800,
+    10px 14px 0px #d82800, 12px 14px 0px #d82800, 14px 14px 0px #d82800,
+    16px 14px 0px #fc9838, 18px 14px 0px #fc9838, 20px 14px 0px #fc9838,
+    22px 14px 0px #fc9838, 24px 14px 0px #fc9838, 26px 14px 0px #fc9838,
+    28px 14px 0px #fc9838, 30px 14px 0px #fc9838, 2px 16px 0px #fc9838,
+    4px 16px 0px #fc9838, 6px 16px 0px #d82800, 8px 16px 0px #d82800,
+    10px 16px 0px #d82800, 12px 16px 0px #d82800, 14px 16px 0px #d82800,
+    16px 16px 0px #fc9838, 18px 16px 0px #fc9838, 20px 16px 0px #fc9838,
+    22px 16px 0px #fc9838, 24px 16px 0px #fc9838, 26px 16px 0px #d82800,
+    28px 16px 0px #d82800, 30px 16px 0px #fc9838, 32px 16px 0px #fc9838,
+    2px 18px 0px #fc9838, 4px 18px 0px #fc9838, 6px 18px 0px #d82800,
+    8px 18px 0px #d82800, 10px 18px 0px #d82800, 12px 18px 0px #d82800,
+    14px 18px 0px #d82800, 16px 18px 0px #fc9838, 18px 18px 0px #fc9838,
+    20px 18px 0px #fc9838, 22px 18px 0px #fc9838, 24px 18px 0px #fc9838,
+    26px 18px 0px #d82800, 28px 18px 0px #d82800, 30px 18px 0px #d82800,
+    32px 18px 0px #fc9838, 2px 20px 0px #fc9838, 4px 20px 0px #fc9838,
+    6px 20px 0px #fc9838, 8px 20px 0px #d82800, 10px 20px 0px #d82800,
+    12px 20px 0px #d82800, 14px 20px 0px #fc9838, 16px 20px 0px #fc9838,
+    18px 20px 0px #fc9838, 20px 20px 0px #fc9838, 22px 20px 0px #fc9838,
+    24px 20px 0px #fc9838, 26px 20px 0px #fc9838, 28px 20px 0px #d82800,
+    30px 20px 0px #d82800, 32px 20px 0px #fc9838, 2px 22px 0px #fc9838,
+    4px 22px 0px #fc9838, 6px 22px 0px #fc9838, 8px 22px 0px #fc9838,
+    10px 22px 0px #fc9838, 12px 22px 0px #fc9838, 14px 22px 0px #fc9838,
+    16px 22px 0px #fc9838, 18px 22px 0px #fc9838, 20px 22px 0px #fc9838,
+    22px 22px 0px #fc9838, 24px 22px 0px #fc9838, 26px 22px 0px #fc9838,
+    28px 22px 0px #fc9838, 30px 22px 0px #fc9838, 32px 22px 0px #fc9838,
+    4px 24px 0px #fc9838, 6px 24px 0px #d82800, 8px 24px 0px #d82800,
+    10px 24px 0px #d82800, 12px 24px 0px #fff, 14px 24px 0px #fff,
+    16px 24px 0px #fff, 18px 24px 0px #fff, 20px 24px 0px #fff,
+    22px 24px 0px #fff, 24px 24px 0px #d82800, 26px 24px 0px #d82800,
+    28px 24px 0px #d82800, 30px 24px 0px #fc9838, 10px 26px 0px #fff,
+    12px 26px 0px #fff, 14px 26px 0px #fff, 16px 26px 0px #fff,
+    18px 26px 0px #fff, 20px 26px 0px #fff, 22px 26px 0px #fff,
+    24px 26px 0px #fff, 10px 28px 0px #fff, 12px 28px 0px #fff,
+    14px 28px 0px #fff, 16px 28px 0px #fff, 18px 28px 0px #fff,
+    20px 28px 0px #fff, 22px 28px 0px #fc9838, 24px 28px 0px #fff,
+    10px 30px 0px #fff, 12px 30px 0px #fff, 14px 30px 0px #fff,
+    16px 30px 0px #fff, 18px 30px 0px #fff, 20px 30px 0px #fff,
+    22px 30px 0px #fc9838, 24px 30px 0px #fff, 12px 32px 0px #fff,
+    14px 32px 0px #fff, 16px 32px 0px #fff, 18px 32px 0px #fff,
+    20px 32px 0px #fc9838, 22px 32px 0px #fff;
+  transform: translate(0px, 0px);
+  z-index: -1;
+  opacity: 0;
+}
+
+.box:hover + .mush {
+  animation: mush 0.5s linear forwards;
+  opacity: 1;
+}
+
+@keyframes mush {
+  0%   { transform: scale(0.8) translate(0px,   0px); }
+  50%  { transform: scale(1.1) translate(0px, -80px); }
+  100% { transform: scale(1.1) translate(0px, -35px); }
+}
+
+/* ============================
+   SCROLLBAR
+   ============================ */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: var(--outer-space); }
+::-webkit-scrollbar-thumb { background: var(--mid); }
+
+/* ============================
+   UTILITY
+   ============================ */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
 }
