@@ -42,7 +42,7 @@ export function MinimalistHero({
   return (
     <div
       className={cn(
-        "relative flex h-screen w-full flex-col items-center justify-between overflow-hidden bg-background p-8 font-sans md:p-12",
+        "relative flex h-screen w-full flex-col items-center justify-between overflow-hidden bg-background px-8 pt-8 pb-0 font-sans md:px-12 md:pt-12 md:pb-0",
         className
       )}
     >

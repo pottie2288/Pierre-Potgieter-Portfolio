@@ -603,7 +603,7 @@ a { color: inherit; text-decoration: none; }
    PHILOSOPHY
    ============================ */
 .philosophy-section {
-  padding: clamp(64px, 10vh, 120px) 0;
+  padding: clamp(20px, 3vh, 40px) 0 clamp(64px, 10vh, 120px);
   overflow: hidden;
   border-top: 1px solid var(--border);
 }
