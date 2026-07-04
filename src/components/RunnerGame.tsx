@@ -276,8 +276,8 @@ function drawBg(ctx: CanvasRenderingContext2D, W: number, H: number, frame: numb
     ctx.globalAlpha = 1;
   }
 
-  // ── Clouds — three parallax layers ──────────────────────────────────────────
-  if (nightT < 0.65) {
+  // ── Clouds — desktop only (canvas wider than 600 px) ────────────────────────
+  if (nightT < 0.65 && W > 600) {
     ctx.globalAlpha = Math.min(1, 1 - nightT / 0.65);
     const cloudLayers = [
       { speed:0.08, yF:0.12, sc:1.6, gap:380, off:0 },
@@ -456,21 +456,19 @@ function tickParticles(ctx: CanvasRenderingContext2D, ps: Part[]): Part[] {
 }
 
 // ── HUD ───────────────────────────────────────────────────────────────────────
-function drawHUD(ctx: CanvasRenderingContext2D, score:number, hi:number, W:number, hiNew:boolean, frame:number) {
-  ctx.textAlign="right"; ctx.font="11px sans-serif";
-  ctx.fillStyle=hiNew?`rgba(255,215,0,${0.7+Math.sin(frame*0.15)*0.3})`:"rgba(255,255,255,0.55)";
-  ctx.fillText(`TOP  ${String(hi).padStart(5,"0")}`,W-52,32);
-  ctx.font="bold 14px sans-serif"; ctx.fillStyle=M_WHT; ctx.fillText(String(score).padStart(5,"0"),W-14,32);
-  ctx.font="11px sans-serif"; ctx.fillStyle="#FF9999"; ctx.fillText("MARIO",W-14,18);
+function drawHUD(ctx: CanvasRenderingContext2D, score:number, W:number, H:number) {
+  // Score — top right, scales with canvas height for mobile readability
+  const sz = Math.max(13, Math.round(H * 0.038));
+  ctx.textAlign="right";
+  ctx.font=`11px sans-serif`; ctx.fillStyle="#FF9999";
+  ctx.fillText("MARIO", W-14, sz + 4);
+  ctx.font=`bold ${sz}px sans-serif`; ctx.fillStyle=M_WHT;
+  ctx.fillText(String(score).padStart(5,"0"), W-14, sz*2 + 4);
 }
 function drawToast(ctx:CanvasRenderingContext2D,toast:Toast,W:number,groundY:number) {
   const a=Math.min(toast.life,1-Math.max(0,1-toast.life*3))*1.2;
   ctx.globalAlpha=Math.min(a,1); ctx.font="bold 14px sans-serif"; ctx.textAlign="center";
   ctx.fillStyle=toast.color; ctx.fillText(toast.text,W/2,groundY*0.35-(1-toast.life)*20); ctx.globalAlpha=1;
-}
-function drawIdle(ctx:CanvasRenderingContext2D,W:number,groundY:number,frame:number) {
-  ctx.globalAlpha=0.50+Math.sin(frame*0.06)*0.20; ctx.font="bold 12px sans-serif"; ctx.textAlign="center"; ctx.fillStyle=M_YEL;
-  ctx.fillText("PRESS  SPACE  OR  TAP  TO  START",W/2,groundY-22); ctx.globalAlpha=1;
 }
 function drawDeadOverlay(ctx:CanvasRenderingContext2D,score:number,hi:number,W:number,groundY:number,deathTick:number) {
   if (deathTick<28) return;
@@ -600,9 +598,8 @@ export default function RunnerGame() {
       r.obstacles.forEach(o=>drawObs(ctx,o,gy));
       r.particles=tickParticles(ctx,r.particles);
       drawMario(ctx,gy-r.foxY-FOX_H,!r.onGround,r.squashX,r.squashY,r.state==="dying",r.deathTick,r.legPhase);
-      drawHUD(ctx,r.score,r.hi,w,r.hiNew,r.frame);
+      drawHUD(ctx,r.score,w,h);
       if(r.toast)drawToast(ctx,r.toast,w,gy);
-      if(r.state==="idle")drawIdle(ctx,w,gy,r.frame);
       if(r.state==="dying"||r.state==="dead")drawDeadOverlay(ctx,r.score,r.hi,w,gy,r.deathTick);
       if(r.flashAlpha>0){ctx.fillStyle=`rgba(255,80,80,${r.flashAlpha*0.40})`;ctx.fillRect(0,0,w,h);}
       ctx.restore();

@@ -52,34 +52,27 @@ export function MinimalistHero({
         <FloatingPaths position={-1} />
       </div>
 
-      <header className="z-30 flex w-full max-w-7xl items-center justify-between">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-xl font-bold tracking-wider"
-        >
-          {logoText}
-        </motion.div>
-        <div className="hidden items-center space-x-8 md:flex">
-          {navLinks.map((link) => (
-            <NavLink key={link.label} href={link.href}>
-              {link.label}
-            </NavLink>
-          ))}
-        </div>
-        <motion.button
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-          className="flex flex-col space-y-1.5 md:hidden"
-          aria-label="Open menu"
-        >
-          <span className="block h-0.5 w-6 bg-foreground"></span>
-          <span className="block h-0.5 w-6 bg-foreground"></span>
-          <span className="block h-0.5 w-5 bg-foreground"></span>
-        </motion.button>
-      </header>
+      {/* Hero has its own header only when logoText / navLinks are provided.
+          This portfolio passes both as empty, so we skip it entirely. */}
+      {(logoText || navLinks.length > 0) && (
+        <header className="z-30 flex w-full max-w-7xl items-center justify-between">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-xl font-bold tracking-wider"
+          >
+            {logoText}
+          </motion.div>
+          <div className="hidden items-center space-x-8 md:flex">
+            {navLinks.map((link) => (
+              <NavLink key={link.label} href={link.href}>
+                {link.label}
+              </NavLink>
+            ))}
+          </div>
+        </header>
+      )}
 
       <div className="relative grid w-full max-w-7xl flex-grow grid-cols-1 items-center md:grid-cols-3">
         {/* left column — text anchored to the bottom of its cell */}
@@ -109,12 +102,8 @@ export function MinimalistHero({
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
-            className="absolute z-0 h-[380px] w-[380px] rounded-full bg-lime/90 md:h-[520px] md:w-[520px] lg:h-[640px] lg:w-[640px]"
+            className="absolute z-0 h-[280px] w-[280px] rounded-full bg-lime/90 sm:h-[340px] sm:w-[340px] md:h-[520px] md:w-[520px] lg:h-[640px] lg:w-[640px]"
           >
-            {/* concentric rings */}
-            <div style={{ position: "absolute", inset: "8%",  borderRadius: "50%", background: "#141414" }} />
-            <div style={{ position: "absolute", inset: "16%", borderRadius: "50%", background: "#a9a9a9" }} />
-            <div style={{ position: "absolute", inset: "24%", borderRadius: "50%", background: "#f2f2f2" }} />
           </motion.div>
           <motion.img
             src={imageSrc}
