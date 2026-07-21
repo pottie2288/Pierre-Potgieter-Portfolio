@@ -1,5 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240">
-  <rect width="240" height="240" fill="#000000" />
+  <!-- Transparent background (no rect) is deliberate: the mask needs to
+       work under both alpha-based masking (older Safari/WebKit, which
+       ignores mask-mode and always masks by alpha) and luminance-based
+       masking (modern Safari 15.4+, Firefox, Chrome). An opaque black
+       background reads as "fully visible" under alpha masking regardless
+       of luminance, which unmasks the whole shine layer. -->
   <g fill="#ffffff" font-family="ui-monospace, SFMono-Regular, 'JetBrains Mono', Menlo, Consolas, monospace" font-weight="800">
     <text x="4" y="58" font-size="44" transform="rotate(-10 4 58)">&lt;/&gt;</text>
     <text x="150" y="46" font-size="30" transform="rotate(12 150 46)">{ }</text>

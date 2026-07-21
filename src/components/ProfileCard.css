@@ -111,6 +111,15 @@
 }
 
 .pc-shine {
+  /* -webkit-prefixed versions first: older Safari/WebKit only recognizes
+     these (and always masks by alpha, ignoring mask-mode) — the unprefixed
+     versions below override them in engines that support the standard
+     properties (Safari 15.4+, Firefox, Chrome). See profile-card-pattern.svg
+     for why the mask image itself needs to carry real alpha transparency. */
+  -webkit-mask-image: var(--icon);
+  -webkit-mask-repeat: repeat;
+  -webkit-mask-size: 150%;
+  -webkit-mask-position: top calc(200% - (var(--background-y) * 5)) left calc(100% - var(--background-x));
   mask-image: var(--icon);
   mask-mode: luminance;
   mask-repeat: repeat;
