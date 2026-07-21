@@ -2,13 +2,16 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { InstagramIcon } from "./icons";
 import { WHATSAPP_URL } from "@/lib/site";
 
+// Root-relative so these still resolve correctly from pages other than the
+// homepage (e.g. /contact) instead of just scrolling the current page.
 const NAV_LINKS = [
-  { label: "Work",     href: "#work"    },
-  { label: "About Me", href: "#about"   },
-  { label: "Contact",  href: "#contact" },
+  { label: "Work",     href: "/#work"   },
+  { label: "About Me", href: "/#about"  },
+  { label: "Contact",  href: "/contact" },
 ];
 
 export default function Navbar() {
@@ -101,14 +104,16 @@ export default function Navbar() {
           className="navbar-logo-chip"
           style={{ opacity: 0, transition: "opacity 0.6s ease" }}
         >
-          <Image
-            src="/logo.png"
-            alt="Pierre Potgieter"
-            width={24}
-            height={24}
-            style={{ width: "62%", height: "62%", objectFit: "contain" }}
-            priority
-          />
+          <Link href="/" aria-label="Pierre Potgieter — Home" style={{ display: "flex", width: "100%", height: "100%", alignItems: "center", justifyContent: "center" }}>
+            <Image
+              src="/logo.png"
+              alt="Pierre Potgieter"
+              width={24}
+              height={24}
+              style={{ width: "62%", height: "62%", objectFit: "contain" }}
+              priority
+            />
+          </Link>
         </div>
 
         <nav
@@ -124,10 +129,10 @@ export default function Navbar() {
           {/* Brand name */}
           <div className="navbar-logo" style={{ display: "flex", alignItems: "center", gap: 14 }}>
             <span className="navbar-logo-spacer" aria-hidden="true" />
-            <span className="name-hover">
+            <Link href="/" className="name-hover" style={{ color: "inherit", textDecoration: "none" }}>
               <span className="name-hover-actual">PIERRE POTGIETER</span>
               <span aria-hidden="true" className="name-hover-front">PIERRE POTGIETER</span>
-            </span>
+            </Link>
             {!mobile && (
               <span style={{ color: "var(--grey)", fontWeight: 400 }}>
                 | Design that Speaks

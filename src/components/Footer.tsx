@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Logo from "./Logo";
 
 export default function Footer() {
@@ -25,7 +26,7 @@ export default function Footer() {
           <div>
             <p className="footer-col-title">Work/</p>
             <ul className="footer-links">
-              <li><a href="#work">Featured Work</a></li>
+              <li><Link href="/#work">Featured Work</Link></li>
             </ul>
           </div>
 
@@ -33,8 +34,8 @@ export default function Footer() {
           <div>
             <p className="footer-col-title">About/</p>
             <ul className="footer-links">
-              <li><a href="#about">About Me</a></li>
-              <li><a href="#contact">Contact</a></li>
+              <li><Link href="/#about">About Me</Link></li>
+              <li><Link href="/contact">Contact</Link></li>
             </ul>
           </div>
 
