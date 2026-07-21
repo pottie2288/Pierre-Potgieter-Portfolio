@@ -43,9 +43,11 @@ export default function Footer() {
           <div>
             <p className="footer-col-title">Socials/</p>
             <ul className="footer-links">
-              <li><a href="#">X (Twitter)</a></li>
-              <li><a href="#">LinkedIn</a></li>
-              <li><a href="#">YouTube</a></li>
+              <li>
+                <a href="https://www.instagram.com/pierre_potgieter1" target="_blank" rel="noopener noreferrer">
+                  Instagram
+                </a>
+              </li>
             </ul>
           </div>
         </footer>
