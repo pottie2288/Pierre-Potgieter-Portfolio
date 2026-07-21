@@ -143,7 +143,12 @@ function ProfileCardComponent({
 
       const stillFar = Math.abs(targetX - currentX) > 0.05 || Math.abs(targetY - currentY) > 0.05;
 
-      if (stillFar || document.hasFocus()) {
+      // Only keep animating while actually moving toward the target. The
+      // vendor source also OR'd this with `document.hasFocus()`, which
+      // means the loop never stopped for the entire time the tab was
+      // focused — a continuous per-frame cost (9 style.setProperty calls,
+      // forever) that was competing with scroll compositing site-wide.
+      if (stillFar) {
         rafId = requestAnimationFrame(step);
       } else {
         running = false;

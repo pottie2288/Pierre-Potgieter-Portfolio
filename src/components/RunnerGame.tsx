@@ -514,6 +514,10 @@ function hitTest(foxY:number,obs:Obs,groundY:number):boolean {
 export default function RunnerGame() {
   const canvasRef=useRef<HTMLCanvasElement>(null);
   const W=useRef(900), H=useRef(220), GY=useRef(0), dpr=useRef(1);
+  // Game loop keeps redrawing the canvas every frame even when the section
+  // is scrolled out of view — this tracks visibility so the loop can stop
+  // rescheduling itself instead of burning main-thread time site-wide.
+  const isVisible=useRef(true);
 
   const g=useRef<G>({
     state:"idle",vy:0,foxY:0,onGround:true,coyote:0,jumpBuffer:0,jumpCount:0,
@@ -555,6 +559,7 @@ export default function RunnerGame() {
     });
 
     const loop=()=>{
+      if (!isVisible.current) { g.current.animId=0; return; }
       const r=g.current, w=W.current, h=H.current, gy=GY.current;
       ctx.setTransform(dpr.current,0,0,dpr.current,0,0);
       if (r.shake>0){r.shakeX=rnd(-r.shake,r.shake);r.shakeY=rnd(-r.shake,r.shake);r.shake=Math.max(0,r.shake-0.8);}else{r.shakeX=0;r.shakeY=0;}
@@ -609,7 +614,17 @@ export default function RunnerGame() {
     g.current.animId=requestAnimationFrame(loop);
     const onKey=(e:KeyboardEvent)=>{if(e.code==="Space"||e.code==="ArrowUp"){e.preventDefault();doJump();}};
     window.addEventListener("keydown",onKey);
-    return ()=>{cancelAnimationFrame(g.current.animId);window.removeEventListener("resize",resize);window.removeEventListener("keydown",onKey);};
+
+    const io=new IntersectionObserver((entries)=>{
+      const wasVisible=isVisible.current;
+      isVisible.current=entries[0].isIntersecting;
+      if (isVisible.current && !wasVisible && g.current.animId===0) {
+        g.current.animId=requestAnimationFrame(loop);
+      }
+    },{ rootMargin:"200px" });
+    io.observe(canvas);
+
+    return ()=>{cancelAnimationFrame(g.current.animId);window.removeEventListener("resize",resize);window.removeEventListener("keydown",onKey);io.disconnect();};
   },[doJump]);
 
   return (
