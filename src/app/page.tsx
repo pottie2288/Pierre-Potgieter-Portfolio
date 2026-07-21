@@ -1,6 +1,7 @@
 import Navbar              from "@/components/Navbar";
 import HeroSection         from "@/components/HeroSection";
 import FeaturedWork        from "@/components/FeaturedWork";
+import AboutMeSection      from "@/components/AboutMeSection";
 import ServicesSection     from "@/components/ServicesSection";
 import RunnerGame          from "@/components/RunnerGame";
 import PhilosophySection   from "@/components/PhilosophySection";
@@ -14,6 +15,7 @@ export default function Home() {
         <HeroSection />
         <PhilosophySection />
         <FeaturedWork />
+        <AboutMeSection />
         <ServicesSection />
         <RunnerGame />
       </main>

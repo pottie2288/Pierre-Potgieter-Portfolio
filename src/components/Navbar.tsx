@@ -3,12 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { InstagramIcon } from "./icons";
+import { WHATSAPP_URL } from "@/lib/site";
 
 const NAV_LINKS = [
-  { label: "Work",    href: "#work"    },
-  { label: "About",   href: "#about"   },
-  { label: "Journal", href: "#journal" },
-  { label: "Contact", href: "#contact" },
+  { label: "Work",     href: "#work"    },
+  { label: "About Me", href: "#about"   },
+  { label: "Contact",  href: "#contact" },
 ];
 
 export default function Navbar() {
@@ -147,7 +147,14 @@ export default function Navbar() {
           {/* Desktop CTA + Instagram */}
           {!mobile && (
             <div className="navbar-actions">
-              <a href="#contact" className="navbar-cta">Let&apos;s Talk</a>
+              <a
+                href={WHATSAPP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="navbar-cta"
+              >
+                Let&apos;s Talk
+              </a>
               <a
                 href="https://www.instagram.com/pierre_potgieter1"
                 target="_blank"
@@ -235,7 +242,9 @@ export default function Navbar() {
           {/* Bottom — CTA + Instagram */}
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
             <a
-              href="#contact"
+              href={WHATSAPP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               onClick={close}
               className="navbar-cta"
               style={{ fontSize: 13 }}

@@ -26,7 +26,6 @@ export default function Footer() {
             <p className="footer-col-title">Work/</p>
             <ul className="footer-links">
               <li><a href="#work">Featured Work</a></li>
-              <li><a href="#journal">Journal</a></li>
             </ul>
           </div>
 
@@ -34,7 +33,7 @@ export default function Footer() {
           <div>
             <p className="footer-col-title">About/</p>
             <ul className="footer-links">
-              <li><a href="#about">About</a></li>
+              <li><a href="#about">About Me</a></li>
               <li><a href="#contact">Contact</a></li>
             </ul>
           </div>

@@ -78,7 +78,7 @@ export function VerticalTabs() {
   };
 
   return (
-    <section id="about" className="section">
+    <section id="services" className="section">
       <p className="section-label" style={{ display: "flex", alignItems: "center", gap: 8 }}>
         <Logo size={13} color="var(--grey)" />
         What I do
