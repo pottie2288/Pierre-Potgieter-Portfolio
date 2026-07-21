@@ -3,6 +3,9 @@
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { FloatingPaths } from "./background-paths";
+import ProfileCard from "@/components/ProfileCard";
+import TextType from "@/components/TextType";
+import { WHATSAPP_URL } from "@/lib/site";
 
 interface MinimalistHeroProps {
   logoText: string;
@@ -11,10 +14,7 @@ interface MinimalistHeroProps {
   readMoreLink: string;
   imageSrc: string;
   imageAlt: string;
-  overlayText: {
-    part1: string;
-    part2: string;
-  };
+  headlineTexts: string[];
   className?: string;
 }
 
@@ -36,7 +36,7 @@ export function MinimalistHero({
   readMoreLink,
   imageSrc,
   imageAlt,
-  overlayText,
+  headlineTexts,
   className,
 }: MinimalistHeroProps) {
   return (
@@ -83,7 +83,9 @@ export function MinimalistHero({
           transition={{ duration: 0.6, delay: 1.2 }}
           className="z-20 order-1 flex justify-center self-end pb-12 md:justify-start"
         >
-          <h1
+          <TextType
+            as="h1"
+            text={headlineTexts}
             className="font-extrabold text-foreground"
             style={{
               fontSize: "clamp(2rem, 3.5vw, 4.5rem)",
@@ -91,23 +93,43 @@ export function MinimalistHero({
               letterSpacing: "-0.02em",
               textShadow: "0 2px 24px rgba(0,0,0,0.55)",
             }}
-          >
-            {overlayText.part1}
-            <br />
-            {overlayText.part2}
-          </h1>
+            typingSpeed={65}
+            deletingSpeed={35}
+            pauseDuration={1800}
+            initialDelay={1200}
+            loop
+            showCursor
+            cursorCharacter="|"
+            cursorClassName="text-lime"
+          />
         </motion.div>
 
-        <div className="relative order-2 flex h-full items-end justify-center md:items-center">
-          <motion.img
-            src={imageSrc}
-            alt={imageAlt}
-            className="relative z-10 w-72 scale-150 object-cover md:w-80 lg:w-[24rem]"
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.4 }}
+        <motion.div
+          className="relative order-2 z-10 flex h-full items-center justify-center"
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.4 }}
+        >
+          <ProfileCard
+            avatarUrl={imageSrc}
+            miniAvatarUrl={imageSrc}
+            iconUrl="/profile-card-pattern.svg"
+            name="Pierre Potgieter"
+            title="Brand Identity & Web Designer"
+            handle="pierre_potgieter1"
+            status="Available for work"
+            contactText="Let's Talk"
+            showUserInfo
+            enableTilt
+            enableMobileTilt={false}
+            behindGlowEnabled
+            behindGlowColor="rgba(207, 255, 106, 0.45)"
+            innerGradient="linear-gradient(145deg,#1a1a1a8c 0%,#cfff6a33 100%)"
+            onContactClick={() => {
+              window.open(WHATSAPP_URL, "_blank", "noopener,noreferrer");
+            }}
           />
-        </div>
+        </motion.div>
 
         {/* right column intentionally empty — desktop only. On mobile this
             would become its own stretched grid row and eat vertical space

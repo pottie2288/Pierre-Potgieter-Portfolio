@@ -11,7 +11,7 @@ export default function HeroSection() {
       readMoreLink="#work"
       imageSrc="/portrait.png"
       imageAlt="Portrait of Pierre Potgieter"
-      overlayText={{ part1: "Marketing &", part2: "Web Specialist" }}
+      headlineTexts={["Welcome to my website", "Learn more about me", "Yes, I designed this myself."]}
     />
   );
 }
