@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { FloatingPaths } from "./background-paths";
+import Ballpit from "@/components/Ballpit";
 
 interface MinimalistHeroProps {
   logoText: string;
@@ -46,10 +46,19 @@ export function MinimalistHero({
         className
       )}
     >
-      {/* Animated background paths — behind all content */}
+      {/* Physics ball-pit background — behind all content */}
       <div className="absolute inset-0 z-0">
-        <FloatingPaths position={1} />
-        <FloatingPaths position={-1} />
+        <Ballpit
+          count={60}
+          gravity={0.75}
+          friction={0.995}
+          wallBounce={0.95}
+          maxVelocity={0.4}
+          minSize={0.4}
+          maxSize={0.9}
+          colors={[0xffffff, 0xa9a9a9, 0xb8fa3d]}
+          materialParams={{ metalness: 0.3, roughness: 0.4, clearcoat: 0.5, clearcoatRoughness: 0.2 }}
+        />
       </div>
 
       {/* Hero has its own header only when logoText / navLinks are provided.
@@ -75,12 +84,13 @@ export function MinimalistHero({
       )}
 
       <div className="relative grid w-full max-w-7xl flex-grow grid-cols-1 items-center md:grid-cols-3">
-        {/* left column — text anchored to the bottom of its cell */}
+        {/* left column on desktop, top row on mobile — text anchored to the
+            bottom of its cell */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 1.2 }}
-          className="z-20 order-2 flex justify-center self-end pb-12 md:order-1 md:justify-start"
+          className="z-20 order-1 flex justify-center self-end pb-12 md:justify-start"
         >
           <h1
             className="font-extrabold text-foreground"
@@ -97,14 +107,7 @@ export function MinimalistHero({
           </h1>
         </motion.div>
 
-        <div className="relative order-1 flex h-full items-center justify-center md:order-2">
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
-            className="absolute z-0 h-[280px] w-[280px] rounded-full bg-lime/90 sm:h-[340px] sm:w-[340px] md:h-[520px] md:w-[520px] lg:h-[640px] lg:w-[640px]"
-          >
-          </motion.div>
+        <div className="relative order-2 flex h-full items-end justify-center md:items-center">
           <motion.img
             src={imageSrc}
             alt={imageAlt}
@@ -115,8 +118,10 @@ export function MinimalistHero({
           />
         </div>
 
-        {/* right column intentionally empty */}
-        <div className="order-3" />
+        {/* right column intentionally empty — desktop only. On mobile this
+            would become its own stretched grid row and eat vertical space
+            as a blank gap, pushing the portrait away from the bottom. */}
+        <div className="order-3 hidden md:block" />
       </div>
     </div>
   );

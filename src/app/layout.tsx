@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Outfit, DM_Mono } from "next/font/google";
+import ClickSpark from "@/components/ClickSpark";
+import BackgroundMusic from "@/components/BackgroundMusic";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -52,7 +54,12 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${outfit.variable} ${dmMono.variable}`}>
-      <body>{children}</body>
+      <body>
+        <ClickSpark sparkColor="#cfff6a" sparkSize={10} sparkRadius={15} sparkCount={8} duration={400}>
+          {children}
+        </ClickSpark>
+        <BackgroundMusic src="/audio/background.mp3" />
+      </body>
     </html>
   );
 }
