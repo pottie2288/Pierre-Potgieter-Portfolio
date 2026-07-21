@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import Ballpit from "@/components/Ballpit";
+import { FloatingPaths } from "./background-paths";
 
 interface MinimalistHeroProps {
   logoText: string;
@@ -46,19 +46,10 @@ export function MinimalistHero({
         className
       )}
     >
-      {/* Physics ball-pit background — behind all content */}
+      {/* Animated background paths — behind all content */}
       <div className="absolute inset-0 z-0">
-        <Ballpit
-          count={60}
-          gravity={0.75}
-          friction={0.995}
-          wallBounce={0.95}
-          maxVelocity={0.4}
-          minSize={0.4}
-          maxSize={0.9}
-          colors={[0xffffff, 0xa9a9a9, 0xb8fa3d]}
-          materialParams={{ metalness: 0.3, roughness: 0.4, clearcoat: 0.5, clearcoatRoughness: 0.2 }}
-        />
+        <FloatingPaths position={1} />
+        <FloatingPaths position={-1} />
       </div>
 
       {/* Hero has its own header only when logoText / navLinks are provided.
