@@ -11,7 +11,7 @@ export default function HeroSection() {
       readMoreLink="#work"
       imageSrc="/portrait.png"
       imageAlt="Portrait of Pierre Potgieter"
-      headlineTexts={["Welcome to my website", "Learn more about me", "Yes, I designed this myself."]}
+      headlineTexts={["Welcome to my website", "if you're reading this", "I want you to know...", "that god loves you"]}
     />
   );
 }

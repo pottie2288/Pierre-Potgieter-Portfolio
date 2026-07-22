@@ -35,7 +35,7 @@ export default function Footer() {
             <p className="footer-col-title">About/</p>
             <ul className="footer-links">
               <li><Link href="/#about">About Me</Link></li>
-              <li><Link href="/contact">Contact</Link></li>
+              <li><Link href="/#contact">Contact</Link></li>
             </ul>
           </div>
 

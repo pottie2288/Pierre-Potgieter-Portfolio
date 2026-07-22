@@ -9,9 +9,9 @@ import { WHATSAPP_URL } from "@/lib/site";
 // Root-relative so these still resolve correctly from pages other than the
 // homepage (e.g. /contact) instead of just scrolling the current page.
 const NAV_LINKS = [
-  { label: "Work",     href: "/#work"   },
-  { label: "About Me", href: "/#about"  },
-  { label: "Contact",  href: "/contact" },
+  { label: "Work",     href: "/#work"    },
+  { label: "About Me", href: "/#about"   },
+  { label: "Contact",  href: "/#contact" },
 ];
 
 export default function Navbar() {
