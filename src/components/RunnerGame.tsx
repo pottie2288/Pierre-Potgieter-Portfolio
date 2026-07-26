@@ -216,6 +216,136 @@ function drawHill(ctx: CanvasRenderingContext2D, cx: number, groundY: number, r:
   });
 }
 
+// ── offscreen layer caches ────────────────────────────────────────────────────
+// The background art is static — only its X position changes — yet it used to be
+// re-derived from scratch every frame: ~460 individual canvas fills per frame
+// (~28k/second), plus a fresh CanvasGradient allocation each frame. Each piece is
+// now rasterised once into an offscreen canvas and blitted thereafter, which is
+// what a sprite renderer would do. The caches are painted by the very same
+// drawCloud/drawHill/drawMountain functions, so the art is unchanged.
+
+interface Sprite { c: HTMLCanvasElement; ox: number; oy: number; }  // ox/oy = anchor
+
+function makeCanvas(w: number, h: number): [HTMLCanvasElement, CanvasRenderingContext2D] | null {
+  if (typeof document === "undefined") return null;
+  const c = document.createElement("canvas");
+  c.width  = Math.max(1, Math.ceil(w));
+  c.height = Math.max(1, Math.ceil(h));
+  const cx = c.getContext("2d");
+  return cx ? [c, cx] : null;
+}
+
+// Cloud, keyed by scale. Anchor is the (cx, cy) drawCloud would have been given.
+const cloudCache = new Map<number, Sprite | null>();
+function cloudSprite(sc: number): Sprite | null {
+  const hit = cloudCache.get(sc);
+  if (hit !== undefined) return hit;
+  const r = 22 * sc;
+  // Bounds of every bump/base drawn by drawCloud, plus the 3px outline pad.
+  const ox = r * 1.46 + 4, top = r * 1.28 + 4, bot = r * 0.84 + 4;
+  const made = makeCanvas(ox * 2, top + bot);
+  if (!made) { cloudCache.set(sc, null); return null; }
+  const [c, cx] = made;
+  drawCloud(cx, ox, top, sc);
+  const s: Sprite = { c, ox, oy: top };
+  cloudCache.set(sc, s);
+  return s;
+}
+
+// Hill, keyed by radius + colours. Anchor is (cx, groundY).
+const hillCache = new Map<string, Sprite | null>();
+function hillSprite(r: number, main: string, hi: string): Sprite | null {
+  const key = `${r}|${main}|${hi}`;
+  const hit = hillCache.get(key);
+  if (hit !== undefined) return hit;
+  const pad = 2;
+  const made = makeCanvas(r * 2 + pad * 2, r + pad * 2);
+  if (!made) { hillCache.set(key, null); return null; }
+  const [c, cx] = made;
+  drawHill(cx, r + pad, r + pad, r, main, hi);
+  const s: Sprite = { c, ox: r + pad, oy: r + pad };
+  hillCache.set(key, s);
+  return s;
+}
+
+// Mountain silhouette + snow cap. Extracted verbatim from drawBg's inline path
+// work so the cache and any fallback share one definition. Anchor is (mx, groundY).
+function drawMountain(ctx: CanvasRenderingContext2D, mx: number, groundY: number) {
+  ctx.fillStyle = "#6A90D8";
+  ctx.beginPath();
+  ctx.moveTo(mx - 90, groundY);
+  ctx.lineTo(mx,      groundY - 90);
+  ctx.lineTo(mx + 90, groundY);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle = "#C8DCF4";
+  ctx.beginPath();
+  ctx.moveTo(mx - 20, groundY - 68);
+  ctx.lineTo(mx,      groundY - 90);
+  ctx.lineTo(mx + 20, groundY - 68);
+  ctx.closePath(); ctx.fill();
+}
+
+let mountainSprite: Sprite | null | undefined;
+function getMountainSprite(): Sprite | null {
+  if (mountainSprite !== undefined) return mountainSprite;
+  const pad = 2;
+  const made = makeCanvas(180 + pad * 2, 90 + pad * 2);
+  if (!made) { mountainSprite = null; return null; }
+  const [c, cx] = made;
+  drawMountain(cx, 90 + pad, 90 + pad);
+  mountainSprite = { c, ox: 90 + pad, oy: 90 + pad };
+  return mountainSprite;
+}
+
+// Hoisted out of drawBg — this array literal was being re-allocated every frame.
+const CLOUD_LAYERS = [
+  { speed: 0.08, yF: 0.12, sc: 1.6,  gap: 380, off: 0   },
+  { speed: 0.14, yF: 0.22, sc: 1.1,  gap: 300, off: 150 },
+  { speed: 0.22, yF: 0.32, sc: 0.70, gap: 210, off: 80  },
+];
+
+// Sky gradient — was a fresh CanvasGradient every frame. nightT is quantised so
+// the gradient is rebuilt at most a few dozen times across a whole run instead.
+const NIGHT_STEPS = 64;
+let skyCache: { g: CanvasGradient; key: string } | null = null;
+function skyGradient(ctx: CanvasRenderingContext2D, groundY: number, nightT: number): CanvasGradient {
+  const q = Math.round(nightT * NIGHT_STEPS) / NIGHT_STEPS;
+  const key = `${q}|${groundY}`;
+  if (skyCache && skyCache.key === key) return skyCache.g;
+  const t = q / 0.5;
+  const g = ctx.createLinearGradient(0, 0, 0, groundY);
+  g.addColorStop(0,   `rgb(${Math.round(lerp(72,20,t))},${Math.round(lerp(132,15,t))},${Math.round(lerp(238,50,t))})`);
+  g.addColorStop(0.6, `rgb(${Math.round(lerp(92,25,t))},${Math.round(lerp(160,20,t))},${Math.round(lerp(255,60,t))})`);
+  g.addColorStop(1,   `rgb(${Math.round(lerp(120,30,t))},${Math.round(lerp(185,25,t))},${Math.round(lerp(255,70,t))})`);
+  skyCache = { g, key };
+  return g;
+}
+
+// Ground brick lattice. The pattern repeats every 32px horizontally (odd rows
+// offset by half a brick), so one 512px-wide tile covers 16 periods and the whole
+// floor becomes ~4 blits per frame instead of 255 fillRects.
+const BRICK_H = 14, BRICK_W = 32, MORTAR = 2, TILE_PERIODS = 16;
+let groundTile: { c: HTMLCanvasElement; key: number } | null = null;
+function groundTileFor(nightT: number): HTMLCanvasElement | null {
+  const key = Math.round(nightT * NIGHT_STEPS);
+  if (groundTile && groundTile.key === key) return groundTile.c;
+  const q  = key / NIGHT_STEPS;
+  const dR = Math.round(lerp(148,35,q)), dG = Math.round(lerp(50,25,q));
+  const tw = BRICK_W * TILE_PERIODS, th = 5 * BRICK_H;
+  const made = makeCanvas(tw, th);
+  if (!made) return null;
+  const [c, cx] = made;
+  cx.fillStyle = `rgb(${dR},${dG},0)`;
+  for (let row = 0; row < 5; row++) cx.fillRect(0, row * BRICK_H, tw, MORTAR);
+  for (let row = 0; row < 5; row++) {
+    const phase = row % 2 === 0 ? 0 : BRICK_W / 2;
+    for (let col = 0; col < TILE_PERIODS; col++)
+      cx.fillRect(col * BRICK_W + phase, row * BRICK_H + MORTAR, MORTAR, BRICK_H - MORTAR);
+  }
+  groundTile = { c, key };
+  return c;
+}
+
 function drawBg(ctx: CanvasRenderingContext2D, W: number, H: number, frame: number, nightT: number) {
   const groundY = H - GROUND_OFFSET;
 
@@ -223,12 +353,7 @@ function drawBg(ctx: CanvasRenderingContext2D, W: number, H: number, frame: numb
   // Day: classic Mario blue (#5C94FC → #90C0FF horizon)
   // Underground: near-black purple cave
   if (nightT < 0.5) {
-    const t = nightT / 0.5;
-    const grad = ctx.createLinearGradient(0, 0, 0, groundY);
-    grad.addColorStop(0,   `rgb(${Math.round(lerp(72,20,t))},${Math.round(lerp(132,15,t))},${Math.round(lerp(238,50,t))})`);
-    grad.addColorStop(0.6, `rgb(${Math.round(lerp(92,25,t))},${Math.round(lerp(160,20,t))},${Math.round(lerp(255,60,t))})`);
-    grad.addColorStop(1,   `rgb(${Math.round(lerp(120,30,t))},${Math.round(lerp(185,25,t))},${Math.round(lerp(255,70,t))})`);
-    ctx.fillStyle = grad;
+    ctx.fillStyle = skyGradient(ctx, groundY, nightT);
   } else {
     // Underground cave
     const t = (nightT - 0.5) / 0.5;
@@ -267,23 +392,11 @@ function drawBg(ctx: CanvasRenderingContext2D, W: number, H: number, frame: numb
   // ── Background mountain silhouettes (far layer, very faint blue-grey) ───────
   if (nightT < 0.7) {
     ctx.globalAlpha = (1 - nightT/0.7) * 0.55;
-    ctx.fillStyle = "#6A90D8";
+    const s = getMountainSprite();
     for (let i = 0; i < 6; i++) {
       const mx = ((i * 190 - frame * 0.06) % (W + 220) + W + 220) % (W + 220) - 110;
-      // Jagged mountain triangle
-      ctx.beginPath();
-      ctx.moveTo(mx - 90, groundY);
-      ctx.lineTo(mx,       groundY - 90);
-      ctx.lineTo(mx + 90,  groundY);
-      ctx.closePath(); ctx.fill();
-      // Snow cap
-      ctx.fillStyle = "#C8DCF4";
-      ctx.beginPath();
-      ctx.moveTo(mx - 20, groundY - 68);
-      ctx.lineTo(mx,       groundY - 90);
-      ctx.lineTo(mx + 20,  groundY - 68);
-      ctx.closePath(); ctx.fill();
-      ctx.fillStyle = "#6A90D8";
+      if (s) ctx.drawImage(s.c, mx - s.ox, groundY - s.oy);
+      else   drawMountain(ctx, mx, groundY);
     }
     ctx.globalAlpha = 1;
   }
@@ -291,9 +404,11 @@ function drawBg(ctx: CanvasRenderingContext2D, W: number, H: number, frame: numb
   // ── Back hills (dark green, slow parallax) ───────────────────────────────────
   if (nightT < 0.85) {
     ctx.globalAlpha = 1 - nightT / 0.85;
+    const s = hillSprite(105, "#1C8A00", "#3DB800");
     for (let i = 0; i < 5; i++) {
       const hx = ((i * 250 - frame * 0.10) % (W + 300) + W + 300) % (W + 300) - 150;
-      drawHill(ctx, hx, groundY, 105, "#1C8A00", "#3DB800");
+      if (s) ctx.drawImage(s.c, hx - s.ox, groundY - s.oy);
+      else   drawHill(ctx, hx, groundY, 105, "#1C8A00", "#3DB800");
     }
     ctx.globalAlpha = 1;
   }
@@ -301,9 +416,11 @@ function drawBg(ctx: CanvasRenderingContext2D, W: number, H: number, frame: numb
   // ── Front hills (bright green, faster parallax) ──────────────────────────────
   if (nightT < 0.75) {
     ctx.globalAlpha = 1 - nightT / 0.75;
+    const s = hillSprite(76, "#2CB800", "#5AE020");
     for (let i = 0; i < 5; i++) {
       const hx = ((i * 200 + 90 - frame * 0.20) % (W + 240) + W + 240) % (W + 240) - 120;
-      drawHill(ctx, hx, groundY, 76, "#2CB800", "#5AE020");
+      if (s) ctx.drawImage(s.c, hx - s.ox, groundY - s.oy);
+      else   drawHill(ctx, hx, groundY, 76, "#2CB800", "#5AE020");
     }
     ctx.globalAlpha = 1;
   }
@@ -311,15 +428,12 @@ function drawBg(ctx: CanvasRenderingContext2D, W: number, H: number, frame: numb
   // ── Clouds — desktop only (canvas wider than 600 px) ────────────────────────
   if (nightT < 0.65 && W > 600) {
     ctx.globalAlpha = Math.min(1, 1 - nightT / 0.65);
-    const cloudLayers = [
-      { speed:0.08, yF:0.12, sc:1.6, gap:380, off:0 },
-      { speed:0.14, yF:0.22, sc:1.1, gap:300, off:150 },
-      { speed:0.22, yF:0.32, sc:0.70, gap:210, off:80 },
-    ];
-    for (const { speed, yF, sc, gap, off } of cloudLayers) {
+    for (const { speed, yF, sc, gap, off } of CLOUD_LAYERS) {
+      const s = cloudSprite(sc);
       for (let i = 0; i < 5; i++) {
         const cx = ((i*gap + off - frame*speed) % (W+gap) + W+gap) % (W+gap) - gap/2;
-        drawCloud(ctx, cx, H * yF, sc);
+        if (s) ctx.drawImage(s.c, cx - s.ox, H * yF - s.oy);
+        else   drawCloud(ctx, cx, H * yF, sc);
       }
     }
     ctx.globalAlpha = 1;
@@ -329,9 +443,23 @@ function drawBg(ctx: CanvasRenderingContext2D, W: number, H: number, frame: numb
 // ── ground ────────────────────────────────────────────────────────────────────
 function drawGround(ctx: CanvasRenderingContext2D, W: number, groundY: number, frame: number, speed: number, nightT: number) {
   const gR=Math.round(lerp(200,55,nightT)), gG=Math.round(lerp(75,40,nightT)), gB=Math.round(lerp(0,20,nightT));
-  const dR=Math.round(lerp(148,35,nightT)), dG=Math.round(lerp(50,25,nightT));
   ctx.fillStyle=`rgb(${gR},${gG},${gB})`; ctx.fillRect(0,groundY,W,GROUND_OFFSET);
-  const dark=`rgb(${dR},${dG},0)`, bH=14, bW=32, m=2, scroll=(frame*speed*0.55)%bW;
+
+  const scroll=(frame*speed*0.55)%BRICK_W;
+  const tile=groundTileFor(nightT);
+  if (tile) {
+    // Tile width is a whole number of brick periods, so offsetting by the
+    // within-brick scroll alone lines every repeat up seamlessly. Rounded as
+    // Math.round(-scroll), not -Math.round(scroll): JS rounds .5 toward +∞, so
+    // the two differ by 1px on exact half-pixel phases and only the former
+    // reproduces the original per-brick positions.
+    const base=Math.round(-scroll);
+    for (let x=base; x<W; x+=tile.width) ctx.drawImage(tile,x,groundY);
+    return;
+  }
+  // Fallback: original per-brick path if an offscreen canvas isn't available.
+  const dR=Math.round(lerp(148,35,nightT)), dG=Math.round(lerp(50,25,nightT));
+  const dark=`rgb(${dR},${dG},0)`, bH=BRICK_H, bW=BRICK_W, m=MORTAR;
   ctx.fillStyle=dark;
   for (let row=0;row<5;row++) ctx.fillRect(0,groundY+row*bH,W,m);
   for (let row=0;row<5;row++) {
@@ -610,8 +738,16 @@ export default function RunnerGame() {
     // Now the simulation always ticks at a true 60Hz in wall-clock terms and
     // rendering happens once per animation frame, so the game plays at the same
     // speed on every device and every refresh rate.
-    const STEP_MS   = 1000/60;   // one simulation tick — matches original tuning
-    const MAX_STEPS = 5;         // bound catch-up work so a stall can't spiral
+    // TEMPO scales the simulation RATE rather than the individual constants, so
+    // every hand-tuned relationship (jump arc vs gravity vs scroll speed) stays
+    // exactly as authored — it just plays out faster in wall-clock terms.
+    //   1.0 = the 60Hz tuning the constants were written for
+    //   2.0 = the pace this ran at on a 120Hz display, which is the feel we want
+    // Bonus: at 2.0 on a 120Hz screen the sim ticks 1:1 with rendering, so no
+    // frame shows a repeated simulation state.
+    const TEMPO     = 2.0;
+    const STEP_MS   = 1000/(60*TEMPO);      // one simulation tick
+    const MAX_STEPS = Math.ceil(5*TEMPO);   // bound catch-up so a stall can't spiral
     let lastT = 0;
     let acc   = 0;
 
