@@ -91,9 +91,19 @@ export const metadata: Metadata = {
       "Brand identity and web design portfolio of Pierre Potgieter.",
     images: ["/logo.png"],
   },
+  // Served from /public so the URLs are stable across builds. Google requires a
+  // stable favicon URL, and the app/favicon.ico file convention appends a build
+  // hash (/favicon.ico?favicon.<hash>.ico) that changes on every deploy. Sizes
+  // are declared truthfully and are >48px as Google recommends; the .ico carries
+  // real 48/32/16 renditions for browser tabs.
   icons: {
-    icon: "/logo.png",
-    apple: "/logo.png",
+    icon: [
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+      { url: "/icon.png",     sizes: "192x192", type: "image/png" },
+      { url: "/favicon.ico",  sizes: "48x48 32x32 16x16", type: "image/x-icon" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
   },
 };
 
