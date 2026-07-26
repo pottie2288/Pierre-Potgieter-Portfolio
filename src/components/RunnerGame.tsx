@@ -32,25 +32,19 @@ const M_GND2   = "#943200";
 const M_COIN   = "#FFB800";
 
 // ── sprite images ─────────────────────────────────────────────────────────────
-// The source PNGs are wildly oversized for their on-screen size (koopa2.png is
-// 3200x3116 but renders at ~76px wide). Drawing straight from those images made
-// the browser resample ~10 megapixels down to ~32k pixels on every single frame,
-// and held ~45 MB of decoded bitmaps in memory. Instead each sprite is resampled
-// ONCE into a small offscreen canvas at roughly display size; the per-frame draw
-// then blits from that, which is ~50x less pixel work per frame.
+// These are held at full source resolution on purpose. Nothing draws from them
+// directly per frame — sizedSprite() below resamples each one exactly once, at
+// the precise device-pixel size it will occupy, with high-quality filtering.
+// Keeping the full-resolution source means that single resample has the most
+// information to work with; an intermediate downscale step here would just be a
+// lossy extra generation.
 const IMGS: {
-  mario:   HTMLCanvasElement | null;
-  goomba:  HTMLCanvasElement | null;
-  koopa:   HTMLCanvasElement | null;
-  koopa2:  HTMLCanvasElement | null;
-  piranha: HTMLCanvasElement | null;
+  mario:   HTMLImageElement | null;
+  goomba:  HTMLImageElement | null;
+  koopa:   HTMLImageElement | null;
+  koopa2:  HTMLImageElement | null;
+  piranha: HTMLImageElement | null;
 } = { mario: null, goomba: null, koopa: null, koopa2: null, piranha: null };
-
-// Comfortably above the largest real destination size (piranha at 96x150 CSS px
-// on a dpr-2 display = 192x300 device px), so the per-frame draw is always a
-// mild downscale and never a blurry upscale.
-const SPRITE_MAX_W = 384;
-const SPRITE_MAX_H = 512;
 
 function loadImg(src: string): Promise<HTMLImageElement> {
   return new Promise(resolve => {
@@ -61,36 +55,14 @@ function loadImg(src: string): Promise<HTMLImageElement> {
   });
 }
 
-// Resample an oversized source image down to a cheap-to-draw offscreen canvas,
-// preserving aspect ratio and never upscaling. Returns null for images that
-// failed to load, so callers fall back to the vector placeholder.
-function prescale(img: HTMLImageElement): HTMLCanvasElement | null {
-  if (!img.naturalWidth || !img.naturalHeight) return null;
-  const scale = Math.min(
-    SPRITE_MAX_W / img.naturalWidth,
-    SPRITE_MAX_H / img.naturalHeight,
-    1,
-  );
-  const w = Math.max(1, Math.round(img.naturalWidth  * scale));
-  const h = Math.max(1, Math.round(img.naturalHeight * scale));
-  const c = document.createElement("canvas");
-  c.width = w; c.height = h;
-  const cx = c.getContext("2d");
-  if (!cx) return null;
-  cx.imageSmoothingEnabled = true;
-  cx.imageSmoothingQuality = "high";   // one-off cost, keeps the downscale clean
-  cx.drawImage(img, 0, 0, w, h);
-  return c;
-}
-
 // Draw the full sprite scaled into the destination rect, with optional flip.
 function drawImg(
   ctx: CanvasRenderingContext2D,
-  img: HTMLCanvasElement | null,
+  img: HTMLImageElement | null,
   dx: number, dy: number, dw: number, dh: number,
   flipX = false,
 ): boolean {
-  if (!img || !img.width) return false;
+  if (!img || !img.naturalWidth) return false;
   ctx.save();
   if (flipX) {
     ctx.translate(dx + dw, 0);
@@ -509,6 +481,7 @@ function drawMario(
   squashX: number, squashY: number,
   dead: boolean, deathTick: number,
   legPhase: number,
+  dpr: number,
 ) {
   if (isAir && !dead) {
     const sc=Math.max(0.3,1-screenY/200);
@@ -525,10 +498,51 @@ function drawMario(
   }
   ctx.translate(-FOX_W/2,-FOX_H/2);
 
-  if (!drawImg(ctx, IMGS.mario, 0, 0, FOX_W, FOX_H))
+  const s = sizedSprite("mario", IMGS.mario, FOX_W, FOX_H, dpr);
+  if (s) ctx.drawImage(s, 0, 0, FOX_W, FOX_H);
+  else if (!drawImg(ctx, IMGS.mario, 0, 0, FOX_W, FOX_H))
     drawMarioPlaceholder(ctx, 0, 0, FOX_W, FOX_H, legPhase, isAir);
 
   ctx.restore();
+}
+
+// ── crisp sprite rendering ────────────────────────────────────────────────────
+// Scaling a 384px-wide source down to ~192 device px every frame used the
+// browser's default (low-quality) filter, and because each obstacle sits at a
+// fractional X that shifts every frame the sampled texels changed frame to
+// frame — which is what made the sprites shimmer and look soft while moving.
+//
+// Instead each sprite is rasterised ONCE at exactly the device-pixel size it
+// will occupy, using high-quality filtering, and then blitted 1:1 on whole
+// device pixels. A 1:1 blit needs no filtering at all, so this is both sharper
+// and cheaper per frame than what it replaces.
+
+// Snap a CSS-pixel coordinate so that after the dpr transform it lands exactly
+// on a device pixel — this is what removes the per-frame resampling.
+const snap = (v: number, dpr: number) => Math.round(v * dpr) / dpr;
+
+const spriteCache = new Map<string, HTMLCanvasElement | null>();
+function sizedSprite(
+  key: Kind | "mario",
+  src: HTMLImageElement | null,
+  w: number, h: number, dpr: number,
+): HTMLCanvasElement | null {
+  const dw = Math.round(w * dpr), dh = Math.round(h * dpr);
+  const ck = `${key}|${dw}x${dh}`;
+  const hit = spriteCache.get(ck);
+  if (hit !== undefined) return hit;
+  // Deliberately NOT cached: the source images load asynchronously, so a miss
+  // here is temporary. Caching null would pin this sprite to the placeholder
+  // for the rest of the session even after the PNG arrives.
+  if (!src || !src.naturalWidth) return null;
+  const made = makeCanvas(dw, dh);
+  if (!made) { spriteCache.set(ck, null); return null; }
+  const [c, cx] = made;
+  cx.imageSmoothingEnabled = true;
+  cx.imageSmoothingQuality = "high";
+  cx.drawImage(src, 0, 0, dw, dh);
+  spriteCache.set(ck, c);
+  return c;
 }
 
 // ── obstacles ─────────────────────────────────────────────────────────────────
@@ -595,7 +609,17 @@ function drawPiranha(ctx: CanvasRenderingContext2D, x: number, w: number, h: num
   ctx.beginPath(); ctx.arc(cx2, y+h*0.34, w*0.25, 0.05, Math.PI-0.05); ctx.fill();
 }
 
-function drawObs(ctx: CanvasRenderingContext2D, obs: Obs, groundY: number) {
+function drawObs(ctx: CanvasRenderingContext2D, obs: Obs, groundY: number, dpr: number) {
+  // Same sink fractions the per-kind draw functions (and hitTest) use, so the
+  // visual position is byte-for-byte what it was before.
+  const sinkFrac = obs.kind === "piranha" ? 0.22 : 0.14;
+  const dy = groundY - obs.h + Math.round(obs.h * sinkFrac);
+  const s  = sizedSprite(obs.kind, IMGS[obs.kind], obs.w, obs.h, dpr);
+  if (s) {
+    ctx.drawImage(s, snap(obs.x, dpr), snap(dy, dpr), obs.w, obs.h);
+    return;
+  }
+  // No sprite available — fall back to the vector placeholders.
   if      (obs.kind==="goomba")  drawGoomba (ctx,obs.x,obs.w,obs.h,groundY);
   else if (obs.kind==="koopa")   drawKoopa  (ctx,obs.x,obs.w,obs.h,groundY);
   else if (obs.kind==="koopa2")  drawKoopa2 (ctx,obs.x,obs.w,obs.h,groundY);
@@ -649,18 +673,25 @@ function drawDeadOverlay(ctx:CanvasRenderingContext2D,score:number,hi:number,W:n
 }
 
 // ── obstacle spawning ─────────────────────────────────────────────────────────
+// Heights are snapped to 4px steps. Each distinct height needs its own
+// exact-size sprite in the cache, and a continuous range would spawn one per
+// device pixel (~70 per kind, tens of MB). 4px steps bound the cache to a couple
+// of dozen small canvases while leaving the height variety visually unchanged.
+const HEIGHT_STEP = 4;
+const stepH = (v: number) => Math.round(v / HEIGHT_STEP) * HEIGHT_STEP;
+
 function spawnNextObstacle(r: G, canvasW: number) {
   // 4 obstacle types — perfectly even 25 % each for balanced, random feel.
   // Within each type, height is randomised so no two obstacles feel identical.
   const roll = Math.random();
   if (roll < 0.25) {
-    r.obstacles.push({ x: canvasW + 20, w: 96,  h: rnd(115, 150), kind: "piranha" });
+    r.obstacles.push({ x: canvasW + 20, w: 96,  h: stepH(rnd(115, 150)), kind: "piranha" });
   } else if (roll < 0.50) {
-    r.obstacles.push({ x: canvasW + 20, w: 68,  h: rnd(68,  90),  kind: "goomba" });
+    r.obstacles.push({ x: canvasW + 20, w: 68,  h: stepH(rnd(68,  90)),  kind: "goomba" });
   } else if (roll < 0.75) {
-    r.obstacles.push({ x: canvasW + 20, w: 76,  h: rnd(82,  106), kind: "koopa" });
+    r.obstacles.push({ x: canvasW + 20, w: 76,  h: stepH(rnd(82,  106)), kind: "koopa" });
   } else {
-    r.obstacles.push({ x: canvasW + 20, w: 76,  h: rnd(82,  106), kind: "koopa2" });
+    r.obstacles.push({ x: canvasW + 20, w: 76,  h: stepH(rnd(82,  106)), kind: "koopa2" });
   }
   // Gap shrinks as score rises so the game gets progressively harder
   const gap = Math.max(200, 440 - r.score * 0.20) + rnd(0, 130);
@@ -726,8 +757,8 @@ export default function RunnerGame() {
       loadImg("/sprites/koopa2.png"),
       loadImg("/sprites/piranha.png"),
     ]).then(([mario,goomba,koopa,koopa2,piranha])=>{
-      IMGS.mario=prescale(mario); IMGS.goomba=prescale(goomba); IMGS.koopa=prescale(koopa);
-      IMGS.koopa2=prescale(koopa2); IMGS.piranha=prescale(piranha);
+      IMGS.mario=mario; IMGS.goomba=goomba; IMGS.koopa=koopa;
+      IMGS.koopa2=koopa2; IMGS.piranha=piranha;
     });
 
     // ── fixed-timestep simulation ─────────────────────────────────────────────
@@ -795,9 +826,9 @@ export default function RunnerGame() {
       ctx.save(); ctx.translate(r.shakeX,r.shakeY);
       drawBg(ctx,w,h,r.frame,r.nightT);
       drawGround(ctx,w,gy,r.frame,r.speed,r.nightT);
-      r.obstacles.forEach(o=>drawObs(ctx,o,gy));
+      r.obstacles.forEach(o=>drawObs(ctx,o,gy,dpr.current));
       drawParticles(ctx,r.particles);
-      drawMario(ctx,gy-r.foxY-FOX_H,!r.onGround,r.squashX,r.squashY,r.state==="dying",r.deathTick,r.legPhase);
+      drawMario(ctx,gy-r.foxY-FOX_H,!r.onGround,r.squashX,r.squashY,r.state==="dying",r.deathTick,r.legPhase,dpr.current);
       drawHUD(ctx,r.score,w,h);
       if(r.toast)drawToast(ctx,r.toast,w,gy);
       if(r.state==="dying"||r.state==="dead")drawDeadOverlay(ctx,r.score,r.hi,w,gy,r.deathTick);
