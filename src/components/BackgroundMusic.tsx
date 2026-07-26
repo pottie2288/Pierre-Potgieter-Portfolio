@@ -54,7 +54,11 @@ export default function BackgroundMusic({ src, volume = 0.35 }: BackgroundMusicP
 
   return (
     <>
-      <audio ref={audioRef} src={src} loop preload="auto" />
+      {/* preload="none": the track is 8 MB and never plays until the visitor's
+          first interaction, so eagerly fetching and decoding it on load only
+          competed for bandwidth and main-thread time with the rest of the page
+          (notably the canvas game). play() below starts the fetch on demand. */}
+      <audio ref={audioRef} src={src} loop preload="none" />
       <button
         type="button"
         onClick={toggleMusic}

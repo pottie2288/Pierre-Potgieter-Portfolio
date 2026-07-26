@@ -32,15 +32,25 @@ const M_GND2   = "#943200";
 const M_COIN   = "#FFB800";
 
 // ── sprite images ─────────────────────────────────────────────────────────────
-// Loaded as plain HTMLImageElement — no canvas processing, no CORS risk,
-// guaranteed visible regardless of background colour.
+// The source PNGs are wildly oversized for their on-screen size (koopa2.png is
+// 3200x3116 but renders at ~76px wide). Drawing straight from those images made
+// the browser resample ~10 megapixels down to ~32k pixels on every single frame,
+// and held ~45 MB of decoded bitmaps in memory. Instead each sprite is resampled
+// ONCE into a small offscreen canvas at roughly display size; the per-frame draw
+// then blits from that, which is ~50x less pixel work per frame.
 const IMGS: {
-  mario:   HTMLImageElement | null;
-  goomba:  HTMLImageElement | null;
-  koopa:   HTMLImageElement | null;
-  koopa2:  HTMLImageElement | null;
-  piranha: HTMLImageElement | null;
+  mario:   HTMLCanvasElement | null;
+  goomba:  HTMLCanvasElement | null;
+  koopa:   HTMLCanvasElement | null;
+  koopa2:  HTMLCanvasElement | null;
+  piranha: HTMLCanvasElement | null;
 } = { mario: null, goomba: null, koopa: null, koopa2: null, piranha: null };
+
+// Comfortably above the largest real destination size (piranha at 96x150 CSS px
+// on a dpr-2 display = 192x300 device px), so the per-frame draw is always a
+// mild downscale and never a blurry upscale.
+const SPRITE_MAX_W = 384;
+const SPRITE_MAX_H = 512;
 
 function loadImg(src: string): Promise<HTMLImageElement> {
   return new Promise(resolve => {
@@ -51,14 +61,36 @@ function loadImg(src: string): Promise<HTMLImageElement> {
   });
 }
 
-// Draw the full image scaled into the destination rect, with optional flip.
+// Resample an oversized source image down to a cheap-to-draw offscreen canvas,
+// preserving aspect ratio and never upscaling. Returns null for images that
+// failed to load, so callers fall back to the vector placeholder.
+function prescale(img: HTMLImageElement): HTMLCanvasElement | null {
+  if (!img.naturalWidth || !img.naturalHeight) return null;
+  const scale = Math.min(
+    SPRITE_MAX_W / img.naturalWidth,
+    SPRITE_MAX_H / img.naturalHeight,
+    1,
+  );
+  const w = Math.max(1, Math.round(img.naturalWidth  * scale));
+  const h = Math.max(1, Math.round(img.naturalHeight * scale));
+  const c = document.createElement("canvas");
+  c.width = w; c.height = h;
+  const cx = c.getContext("2d");
+  if (!cx) return null;
+  cx.imageSmoothingEnabled = true;
+  cx.imageSmoothingQuality = "high";   // one-off cost, keeps the downscale clean
+  cx.drawImage(img, 0, 0, w, h);
+  return c;
+}
+
+// Draw the full sprite scaled into the destination rect, with optional flip.
 function drawImg(
   ctx: CanvasRenderingContext2D,
-  img: HTMLImageElement | null,
+  img: HTMLCanvasElement | null,
   dx: number, dy: number, dw: number, dh: number,
   flipX = false,
 ): boolean {
-  if (!img || !img.naturalWidth) return false;
+  if (!img || !img.width) return false;
   ctx.save();
   if (flipX) {
     ctx.translate(dx + dw, 0);
@@ -443,16 +475,24 @@ function drawObs(ctx: CanvasRenderingContext2D, obs: Obs, groundY: number) {
 }
 
 // ── particles ─────────────────────────────────────────────────────────────────
-function tickParticles(ctx: CanvasRenderingContext2D, ps: Part[]): Part[] {
+// Stepping and drawing are separate so the simulation can advance on a fixed
+// timestep while rendering happens once per animation frame.
+function stepParticles(ps: Part[]): Part[] {
   const alive:Part[]=[];
   for (const p of ps) {
     p.vy+=p.gravity??0; p.x+=p.vx; p.y+=p.vy; p.life-=0.035;
     if (p.life<=0) continue;
-    ctx.globalAlpha=Math.min(p.life,1)*0.9; ctx.fillStyle=p.color;
-    ctx.beginPath(); ctx.arc(p.x,p.y,p.r*p.life,0,Math.PI*2); ctx.fill();
     alive.push(p);
   }
-  ctx.globalAlpha=1; return alive;
+  return alive;
+}
+
+function drawParticles(ctx: CanvasRenderingContext2D, ps: Part[]) {
+  for (const p of ps) {
+    ctx.globalAlpha=Math.min(p.life,1)*0.9; ctx.fillStyle=p.color;
+    ctx.beginPath(); ctx.arc(p.x,p.y,p.r*p.life,0,Math.PI*2); ctx.fill();
+  }
+  ctx.globalAlpha=1;
 }
 
 // ── HUD ───────────────────────────────────────────────────────────────────────
@@ -545,7 +585,10 @@ export default function RunnerGame() {
   useEffect(()=>{
     const canvas=canvasRef.current; if (!canvas) return;
     const ctx=canvas.getContext("2d"); if (!ctx) return;
-    const resize=()=>{ dpr.current=window.devicePixelRatio||1; W.current=canvas.offsetWidth; H.current=canvas.offsetHeight; GY.current=H.current-GROUND_OFFSET; canvas.width=W.current*dpr.current; canvas.height=H.current*dpr.current; };
+    // Cap the backing store at 2x. A dpr-3 phone would otherwise make the canvas
+    // fill 9x the pixels of a 1x display every frame, for no visible gain. This
+    // matches the clamp the site's other canvas (InkReveal) already uses.
+    const resize=()=>{ dpr.current=Math.min(window.devicePixelRatio||1,2); W.current=canvas.offsetWidth; H.current=canvas.offsetHeight; GY.current=H.current-GROUND_OFFSET; canvas.width=W.current*dpr.current; canvas.height=H.current*dpr.current; };
     resize(); window.addEventListener("resize",resize);
 
     Promise.all([
@@ -555,16 +598,25 @@ export default function RunnerGame() {
       loadImg("/sprites/koopa2.png"),
       loadImg("/sprites/piranha.png"),
     ]).then(([mario,goomba,koopa,koopa2,piranha])=>{
-      IMGS.mario=mario; IMGS.goomba=goomba; IMGS.koopa=koopa; IMGS.koopa2=koopa2; IMGS.piranha=piranha;
+      IMGS.mario=prescale(mario); IMGS.goomba=prescale(goomba); IMGS.koopa=prescale(koopa);
+      IMGS.koopa2=prescale(koopa2); IMGS.piranha=prescale(piranha);
     });
 
-    const loop=()=>{
-      if (!isVisible.current) { g.current.animId=0; return; }
-      const r=g.current, w=W.current, h=H.current, gy=GY.current;
-      ctx.setTransform(dpr.current,0,0,dpr.current,0,0);
+    // ── fixed-timestep simulation ─────────────────────────────────────────────
+    // Every value below (gravity, speed, score, particle life, deathTick…) is
+    // tuned as "amount per frame". Advancing it once per *rendered* frame tied
+    // gameplay speed directly to frame rate, so a device managing 30fps played
+    // the whole game in half speed, and a 120Hz display played it double speed.
+    // Now the simulation always ticks at a true 60Hz in wall-clock terms and
+    // rendering happens once per animation frame, so the game plays at the same
+    // speed on every device and every refresh rate.
+    const STEP_MS   = 1000/60;   // one simulation tick — matches original tuning
+    const MAX_STEPS = 5;         // bound catch-up work so a stall can't spiral
+    let lastT = 0;
+    let acc   = 0;
+
+    const update=(r:G,w:number,gy:number)=>{
       if (r.shake>0){r.shakeX=rnd(-r.shake,r.shake);r.shakeY=rnd(-r.shake,r.shake);r.shake=Math.max(0,r.shake-0.8);}else{r.shakeX=0;r.shakeY=0;}
-      ctx.save(); ctx.translate(r.shakeX,r.shakeY);
-      drawBg(ctx,w,h,r.frame,r.nightT);
 
       if (r.state==="playing"||r.state==="dying") {
         r.frame++;
@@ -599,15 +651,41 @@ export default function RunnerGame() {
       }
 
       if(r.toast){r.toast.life-=0.018;if(r.toast.life<=0)r.toast=null;}
+      r.particles=stepParticles(r.particles);
+    };
+
+    const render=(r:G,w:number,h:number,gy:number)=>{
+      ctx.setTransform(dpr.current,0,0,dpr.current,0,0);
+      ctx.save(); ctx.translate(r.shakeX,r.shakeY);
+      drawBg(ctx,w,h,r.frame,r.nightT);
       drawGround(ctx,w,gy,r.frame,r.speed,r.nightT);
       r.obstacles.forEach(o=>drawObs(ctx,o,gy));
-      r.particles=tickParticles(ctx,r.particles);
+      drawParticles(ctx,r.particles);
       drawMario(ctx,gy-r.foxY-FOX_H,!r.onGround,r.squashX,r.squashY,r.state==="dying",r.deathTick,r.legPhase);
       drawHUD(ctx,r.score,w,h);
       if(r.toast)drawToast(ctx,r.toast,w,gy);
       if(r.state==="dying"||r.state==="dead")drawDeadOverlay(ctx,r.score,r.hi,w,gy,r.deathTick);
       if(r.flashAlpha>0){ctx.fillStyle=`rgba(255,80,80,${r.flashAlpha*0.40})`;ctx.fillRect(0,0,w,h);}
       ctx.restore();
+    };
+
+    const loop=()=>{
+      if (!isVisible.current) { g.current.animId=0; lastT=0; acc=0; return; }
+      const r=g.current, w=W.current, h=H.current, gy=GY.current;
+
+      const now=performance.now();
+      // lastT===0 means this is the first frame, or the loop just resumed after
+      // being scrolled out of view — start fresh instead of billing the gap.
+      let delta=lastT===0?STEP_MS:now-lastT;
+      lastT=now;
+      if (delta>250) delta=STEP_MS;   // backgrounded tab or long stall
+
+      acc+=delta;
+      let steps=0;
+      while (acc>=STEP_MS && steps<MAX_STEPS) { update(r,w,gy); acc-=STEP_MS; steps++; }
+      if (steps===MAX_STEPS) acc=0;   // too far behind — drop the backlog
+
+      render(r,w,h,gy);
       r.animId=requestAnimationFrame(loop);
     };
 
