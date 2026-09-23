@@ -1,29 +1,31 @@
-import Navbar              from "@/components/Navbar";
-import HeroSection         from "@/components/HeroSection";
-import FeaturedWork        from "@/components/FeaturedWork";
-import AboutMeSection      from "@/components/AboutMeSection";
-import InkRevealSection    from "@/components/InkRevealSection";
-import ServicesSection     from "@/components/ServicesSection";
-import ContactSection      from "@/components/ContactSection";
-import RunnerGame          from "@/components/RunnerGame";
-import PhilosophySection   from "@/components/PhilosophySection";
-import Footer              from "@/components/Footer";
+import PageTransition from "@/components/PageTransition";
+import Header from "@/components/Header";
+import Hero from "@/components/Hero";
+import About from "@/components/About";
+import ServicesIntro from "@/components/ServicesIntro";
+import Services from "@/components/Services";
+import Portfolio from "@/components/Portfolio";
+import Credentials from "@/components/Credentials";
+import Contact from "@/components/Contact";
+import Footer from "@/components/Footer";
+import SiteAnimations from "@/components/SiteAnimations";
 
 export default function Home() {
   return (
     <>
-      <Navbar />
-      <main>
-        <HeroSection />
-        <PhilosophySection />
-        <FeaturedWork />
-        <AboutMeSection />
-        <InkRevealSection />
-        <ServicesSection />
-        <ContactSection />
-        <RunnerGame />
+      <PageTransition />
+      <main data-page-container="" className="main-wrapper">
+        <Header />
+        <Hero />
+        <About />
+        <ServicesIntro />
+        <Services />
+        <Portfolio />
+        <Credentials />
+        <Contact />
+        <Footer />
       </main>
-      <Footer />
+      <SiteAnimations />
     </>
   );
 }

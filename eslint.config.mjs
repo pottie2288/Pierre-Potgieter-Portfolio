@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // One-off Node asset generators (CommonJS), not part of the site
+    "scripts/**",
   ]),
 ]);
 

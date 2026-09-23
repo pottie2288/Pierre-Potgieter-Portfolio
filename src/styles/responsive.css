@@ -1,0 +1,180 @@
+/* ------------------------------------------------------------------
+   Responsive overrides. Breakpoints match the reference:
+   991 (tablet), 767 (mobile landscape), 479 (mobile portrait).
+   ------------------------------------------------------------------ */
+
+@media screen and (max-width: 991px) {
+  .heading-h2 { font-size: 3.28125em; }
+  .brand { width: 15em; }
+  .nav-button { gap: 0.75em; }
+  .header { padding: 0.75em 1.5em; }
+  .hero { padding: 3.5em 1.5em 1.5em; }
+  .hero-content-wrap { font-size: 0.75em; }
+
+  .about { padding-top: 7.5em; padding-left: 1.5em; padding-right: 1.5em; }
+  .about-header-wrap { max-width: 31.5em; }
+  .about-header__h { font-size: 3.375em; }
+  .about-header__p { font-size: 0.8625em; }
+  .about-content-wrap { gap: 2.25em; width: 80%; margin-top: 5.625em; }
+
+  .services-header__w { padding: 1.5em; }
+  .services-big-txt { font-size: 2.75em; }
+
+  .services,
+  .services-wrapper,
+  .services-sticky,
+  .services-list {
+    width: 100%;
+    height: auto;
+    position: relative;
+    overflow: visible;
+  }
+  .service-item { width: 100%; height: auto; position: relative; overflow: hidden; }
+  .service-row { z-index: 2; background-color: var(--dark-blue); padding: 0.75em 1.5em; position: relative; }
+  .service-number { font-size: 2.625em; }
+  .service-visual {
+    background-color: var(--dark-blue);
+    flex-flow: column;
+    width: 100%;
+    height: auto;
+    display: flex;
+    position: relative;
+    overflow: hidden;
+  }
+  .service-description { z-index: 2; width: 100%; padding: 3em 1.5em; position: relative; inset: auto; }
+  .service-image-wrap {
+    z-index: 1;
+    aspect-ratio: 16 / 9;
+    flex: none;
+    order: -9999;
+    width: 100%;
+    height: auto;
+    position: relative;
+    inset: auto;
+    overflow: hidden;
+  }
+  .service-title { font-size: 1.875em; }
+
+  .portfolio-orbit { height: 64.125dvh; font-size: 0.75em; }
+  .portfolio-orbit__count { font-size: 3em; }
+  .portfolio-orbit__btn { width: 3em; height: 3em; }
+  .portfolio-orbit__overlay-nav { gap: 1.5em; }
+  .portfolio { padding: 5.625em 1.5em; }
+  .portfolio-header-w { gap: 1.5em; }
+  .portfolio-header__p { font-size: 2.5em; }
+  .progressive-blur { height: 6em; }
+
+  .certified-big-txt { font-size: 5em; }
+  .certification { min-height: 39em; padding: 5.625em 1.5em; }
+  .credential-mark { font-size: 1.5em; }
+
+  .contact-content { gap: 1.5em; }
+
+  .footer__col { gap: 2.25em; width: calc(33.3333% - 1.33333em); }
+  .footer-copy { min-height: 2em; padding: 0.375em 1.5em; }
+  .footer-copy__left { gap: 1.5em; }
+  .footer-copy__label { font-size: 0.75em; }
+  .footer-content-w { gap: 2em; }
+  .footer__links-txt { font-size: 0.9375em; }
+  .footer__links-label { font-size: 1.5em; }
+  .footer-bracket { border-top-width: 0.75em; border-bottom-width: 0.75em; border-left-width: 0.75em; width: 2.625em; }
+  .footer-bracket.is--2 { border-right-width: 0.75em; }
+  .footer-top { gap: 5.625em; padding: 2.25em 1.875em; }
+  .footer { padding: 3.75em 1.5em; }
+}
+
+@media screen and (max-width: 767px) {
+  .heading-h2 { font-size: 2.46094em; }
+  .brand { width: 11.25em; }
+  .nav-button { gap: 0.5em; }
+  .header { padding: 1em; }
+  .hero { padding-bottom: 1em; padding-left: 1em; padding-right: 1em; }
+  /* Portrait crop on phones: keep the face (≈43% across the image) centred */
+  .hero-bg-wrap img { object-position: 41% 50%; }
+  .rotating-globe { font-size: 0.75em; }
+  .partner-wrap { gap: 0.35em; padding: 0.1875em 0.375em; }
+  .partner-dot { width: 0.35em; height: 0.35em; }
+  .hero-label { font-size: 0.75em; }
+  .locate-wrap { gap: 0.75em; }
+  .language-switch__tooltip-text { font-size: 0.6em; }
+
+  .about { padding-top: 5.625em; padding-left: 1em; padding-right: 1em; }
+  .about-header-wrap { max-width: 23.625em; }
+  .about-header__h { font-size: 2.5em; }
+  .about-header__p { font-size: 0.75em; }
+  .about-content-wrap { gap: 1.6875em; margin-top: 4.21875em; }
+
+  .services-header__w { padding: 1em; }
+  .services-big-txt { font-size: 1.85em; }
+  .service-row { padding: 0.5em 1em; }
+  .service-number { font-size: 1.96875em; }
+  .service-description { padding: 2em 1em; }
+  .service-image-wrap { width: 100%; }
+  .service-title { font-size: 1.25em; }
+
+  .portfolio-orbit { height: auto; min-height: 0; max-height: none; padding: 0; overflow: visible; }
+  .portfolio-orbit__content { gap: 3em; grid-template-rows: auto auto; grid-template-columns: 1fr; height: auto; }
+  .portfolio-orbit__info { gap: 2em; height: auto; order: 2; }
+  .portfolio-orbit__collection { min-height: 28em; order: 1; }
+  .portfolio-orbit__count { font-size: 2.25em; }
+  .portfolio-orbit__card { width: clamp(13em, 62vw, 19em); }
+  .portfolio { padding: 4.21875em 1em; }
+  .portfolio-header-w { gap: 1em; }
+  .portfolio-header__p { font-size: 1.5em; }
+
+  .certified-big-txt { font-size: 3.35em; }
+  .certifications-logos { flex-flow: column; gap: 1.25em; }
+  .credential-mark { font-size: 1.25em; }
+  .certification { gap: 2.25em; min-height: 29.25em; padding: 4.21875em 1em; }
+
+  .footer__col { gap: 1em; width: calc(33.3333% - 0.666667em); }
+  .footer__links-list { gap: 0; }
+  .footer-copy { gap: 0.5em; flex-flow: column; padding: 0.5em 1em; }
+  .footer-copy__left { order: 2; justify-content: space-between; width: 100%; }
+  .footer-content-w { gap: 1em; }
+  .footer__links-txt { font-size: 0.703125em; }
+  .footer__links-label { font-size: 1.125em; }
+  .footer-bracket { border-top-width: 0.5625em; border-bottom-width: 0.5625em; border-left-width: 0.5625em; width: 1.96875em; }
+  .footer-bracket.is--2 { border-right-width: 0.5625em; }
+  .footer-top { gap: 4.21875em; padding: 1.5em; }
+  .footer { padding: 2em 1em 4.5em; }
+}
+
+@media screen and (max-width: 479px) {
+  .brand { width: 10em; }
+  .hero-content-wrap { gap: 2em; flex-flow: column; align-items: flex-end; }
+  .partner-wrap { padding: 0.25em 0.5em; font-size: 1.4em; }
+  .hero-label { font-size: 0.85em; }
+  .locate-wrap {
+    background-color: var(--light-silver);
+    border: 1px solid #000;
+    border-radius: 2em;
+    order: -9999;
+    padding: 0.25em 0.5em;
+    font-size: 1.25em;
+  }
+  .language-switch__tooltip-text { font-size: 0.75em; }
+
+  .about-header__h { font-size: 2.45em; }
+  .about-header__p { margin-top: 0.5em; font-size: 0.9em; position: static; }
+  .about-content-wrap { width: 100%; }
+
+  .services-big-txt { font-size: 1.35em; }
+  .service-row { padding-top: 0.75em; padding-bottom: 0.75em; }
+
+  .portfolio-orbit__info { font-size: 1.3em; }
+
+  .certified-big-txt { font-size: 2.5em; }
+
+  .contact-heading { font-size: clamp(4em, 10vw, 10em); }
+
+  .footer__col { width: 100%; }
+  .footer__links-list { gap: 0.25em; }
+  .footer-copy { gap: 1em; padding-top: 1em; padding-bottom: 1em; }
+  .footer-copy__left { gap: 1em; flex-flow: column; align-items: center; }
+  .footer-content-w { gap: 1.5em; flex-flow: wrap; }
+  .footer__links-txt { font-size: 0.9em; }
+  .footer__links-label { font-size: 1.5em; }
+  .footer-top { gap: 3em; }
+  .footer { padding-top: 1em; padding-bottom: 7em; }
+}

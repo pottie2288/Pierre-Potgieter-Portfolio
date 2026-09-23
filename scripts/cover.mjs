@@ -1,0 +1,10 @@
+import { chromium } from 'playwright'; import fs from 'fs';
+const s = JSON.parse(fs.readFileSync('sig3.json', 'utf8'));
+const fill = s.fills.map(d => `<path d="${d}" fill="#fff"/>`).join('');
+const pens = s.pens.map(d => `<path d="${d}" stroke="#fff" stroke-width="${s.pen}" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`).join('');
+const [, , w, h] = s.viewBox.split(' ').map(Number);
+const svg = inner => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${s.viewBox}" width="${w * 2}" height="${h * 2}" style="display:block;background:#000">${inner}</svg>`;
+const b = await chromium.launch({ channel: 'chrome' }); const p = await b.newPage({ viewport: { width: w * 2, height: h * 2 } });
+await p.setContent(`<body style="margin:0">${svg(fill)}</body>`); await p.screenshot({ path: 'cov-fill.png' });
+await p.setContent(`<body style="margin:0">${svg(`<defs><mask id="m" maskUnits="userSpaceOnUse" x="-100" y="-100" width="3000" height="3000">${pens}</mask></defs><g mask="url(#m)">${fill}</g>`)}</body>`); await p.screenshot({ path: 'cov-masked.png' });
+await b.close();

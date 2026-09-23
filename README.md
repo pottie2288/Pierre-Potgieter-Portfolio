@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# pierrepotgieter.co.za v2
 
-## Getting Started
+Portfolio site for Pierre Potgieter. Next.js 16 (App Router, static export-friendly), GSAP 3.15 and Lenis.
 
-First, run the development server:
+The layout, motion and interaction design are recreated from the reference site
+https://alejandroha.com/en (design by Luan Studio, development by Alejandro HA). See
+`docs/research/BEHAVIORS.md` for how every effect works and `docs/research/PAGE_TOPOLOGY.md` for the
+page structure.
+
+## Run
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev      # http://localhost:3000
+npm run build && npm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Where things live
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| What | Where |
+|---|---|
+| All copy, contact details, services and projects | `src/content/site.ts` |
+| Wordmark + signature vectors (generated) | `src/content/vectors.ts` |
+| Section components | `src/components/` |
+| Animation modules (one per effect family) | `src/lib/animations/` |
+| Styles (base, effects, button, sections, responsive) | `src/styles/` |
+| Images | `public/images/`, `public/work/` |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Changing content
 
-## Learn More
+- Text, links, services and projects: edit `src/content/site.ts`. The portfolio counter and orbit
+  adapt to any number of projects (2 or more).
+- Project screenshots: drop a 3:2 or wider JPG into `public/work/` and reference it in `PROJECTS`.
 
-To learn more about Next.js, take a look at the following resources:
+## Regenerating assets
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The scripts in `scripts/` were run once to produce the assets; they need Python (Pillow, numpy) and
+Node (`fontkit`, `hersheytext`) plus the Archivo and Allura TTFs from google/fonts.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `hero.py` composites `portrait.png` (transparent cut-out) onto a studio-grey backdrop at 2880×2160.
+- `logo.js nav 300` / `logo.js footer 400` build the wordmarks from Archivo glyph outlines.
+- `signature.js 34` builds the intro signature: Allura (OFL) filled letterforms plus "pen" strokes traced
+  from EMS Allure centrelines (fitted per letter). The pens are drawn inside an SVG mask, so the smooth
+  calligraphic outlines appear to be written. Needs `Allura-Regular.ttf` from google/fonts.
 
-## Deploy on Vercel
+Paste the JSON output into `src/content/vectors.ts`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Fonts
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The reference uses Atyp BL (Adobe Fonts, licensed). v2 uses Archivo (Google Fonts, OFL) with its width
+axis: 108% width for body text, 100% width at weight 800 for display type, which matches Atyp's
+measured line lengths.

@@ -1,0 +1,214 @@
+/* ------------------------------------------------------------------
+   Button 007: pill button whose hover state is a scribbled stroke
+   drawn across it (GSAP DrawSVG), masking in the hover-colour label.
+   ------------------------------------------------------------------ */
+
+:root {
+  --button-007-color: var(--white);
+  --button-007-color-background: var(--ink-black);
+  --button-007-hover-color: var(--white);
+  --button-007-hover-color-background: var(--dark-blue);
+  --button-007-color-focus: var(--transparent);
+  --button-007-border-radius: 2.5em;
+  --button-007-padding: 0.75em 1em;
+  --button-007-focus-inset: -0.125em;
+  --button-007-overflow: clip;
+  --button-007-click-scale: 0.955 0.925;
+  --button-007-ease-click: cubic-bezier(0.4, 0, 0.2, 1);
+  --button-007-ease-focus: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+[data-button-variant="dark-blue"] {
+  --button-007-color: var(--white);
+  --button-007-color-background: var(--dark-blue);
+  --button-007-hover-color: var(--white);
+  --button-007-hover-color-background: var(--ink-black);
+}
+
+[data-button-variant="light-silver"] {
+  --button-007-color: var(--ink-black);
+  --button-007-color-background: var(--light-silver);
+  --button-007-hover-color: var(--white);
+  --button-007-hover-color-background: var(--dark-blue);
+}
+
+[data-button-variant="white"] {
+  --button-007-color: var(--ink-black);
+  --button-007-color-background: var(--white);
+  --button-007-hover-color: var(--white);
+  --button-007-hover-color-background: var(--dark-blue);
+}
+
+@media (hover: none) and (pointer: coarse) {
+  :root {
+    --button-007-click-scale: 1.045 1.075;
+  }
+  .button-007__text.is--hover,
+  .button-007__svg,
+  .button-007__svg-overlay,
+  .button-007__svg-object {
+    display: none !important;
+  }
+  .button-007__text.is--default {
+    display: block;
+    position: relative;
+    z-index: 2;
+  }
+  .button-007__inner {
+    overflow: hidden;
+  }
+}
+
+.button-007 {
+  --button-007-stroke-width: 60;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  color: var(--button-007-color);
+  background-color: #0000;
+  outline-style: none;
+  padding: 0;
+  line-height: 1;
+  text-decoration: none;
+  display: inline-grid;
+  position: relative;
+  cursor: pointer;
+  transition: scale 0.15s var(--button-007-ease-click);
+}
+
+.button-007:is(:focus-visible)::after {
+  box-shadow: 0 0 0 0.125em var(--button-007-color-focus);
+}
+
+.button-007:active {
+  scale: var(--button-007-click-scale);
+}
+
+.button-007::after {
+  content: "";
+  display: block;
+  position: absolute;
+  inset: var(--button-007-focus-inset);
+  border-radius: var(--button-007-border-radius);
+  transition: box-shadow 0.3s var(--button-007-ease-focus);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.button-007__inner {
+  pointer-events: none;
+  z-index: 1;
+  overflow: var(--button-007-overflow);
+  border-radius: var(--button-007-border-radius);
+  grid-area: 1 / 1;
+  place-items: center;
+  display: grid;
+  position: relative;
+}
+
+.button-007__text {
+  text-transform: uppercase;
+  width: 100%;
+  height: 100%;
+  padding: var(--button-007-padding);
+  grid-area: 1 / 1;
+  display: block;
+}
+
+.button-007__text.is--hover {
+  color: var(--button-007-hover-color);
+  z-index: 2;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+}
+
+.button-007__svg {
+  aspect-ratio: 2;
+  flex: none;
+  width: 100%;
+  height: auto;
+  position: absolute;
+  overflow: visible;
+}
+
+.button-007__svg-object {
+  width: 100%;
+}
+
+.button-007__svg-inner {
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  display: flex;
+}
+
+.button-007__svg-text-wrap {
+  width: 100%;
+  height: auto;
+  padding: var(--button-007-padding);
+  justify-content: center;
+  align-items: center;
+  display: flex;
+}
+
+.button-007__svg-text {
+  text-transform: uppercase;
+  white-space: nowrap;
+  line-height: inherit;
+}
+
+.button-007__svg-overlay {
+  z-index: 1;
+  aspect-ratio: 2;
+  width: 100%;
+  height: auto;
+  color: var(--button-007-hover-color-background);
+  flex: none;
+  position: absolute;
+  overflow: visible !important;
+}
+
+.button-007__svg-overlay path,
+.button-007__svg path {
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scale(1.25);
+}
+
+.button-007__bg {
+  pointer-events: none;
+  background-color: var(--button-007-color-background);
+  border-radius: var(--button-007-border-radius);
+  grid-area: 1 / 1;
+  place-self: center;
+  width: calc(100% - 1px);
+  height: calc(100% - 1px);
+  padding: 0;
+}
+
+.button-group {
+  gap: 1em;
+  justify-content: flex-start;
+  align-items: center;
+  display: flex;
+}
+
+@media screen and (max-width: 991px) {
+  .button-007 {
+    font-size: 0.75em;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .button-007 {
+    font-size: 0.5625em;
+  }
+}
+
+@media screen and (max-width: 479px) {
+  .button-007 {
+    font-size: 0.675em;
+  }
+}
