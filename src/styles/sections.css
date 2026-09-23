@@ -169,12 +169,14 @@
   text-transform: uppercase;
   font-size: 4.5em;
   line-height: 1;
+  text-wrap: balance;
 }
 
 .about-header__p {
   width: 100%;
   max-width: 25em;
   position: relative;
+  text-wrap: balance;
 }
 
 .about-content-wrap {
@@ -577,6 +579,8 @@
   text-align: center;
   text-transform: uppercase;
   font-size: 7.3em;
+  /* Even line lengths, so a short last word never sits alone on its own line */
+  text-wrap: balance;
 }
 
 .certification-content-w {

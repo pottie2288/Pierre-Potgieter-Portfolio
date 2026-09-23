@@ -5,7 +5,7 @@ export const SITE = {
   name: "Pierre Potgieter",
   title: "Pierre Potgieter | Design that Speaks",
   description:
-    "Cape Town web designer and marketer building custom websites, brand identities and ad campaigns for brands across South Africa and beyond.",
+    "Pierre Potgieter is a Cape Town web designer and marketer. I build websites and run Google, Facebook and Instagram ads for businesses across South Africa.",
   tagline: "Design that speaks",
   location: "Cape Town, South Africa",
   email: "pottie2288@gmail.com",
@@ -18,18 +18,18 @@ export const SITE = {
 export const HERO = {
   imageSrc: "/images/hero-portrait.jpg",
   imageAlt: "Black and white portrait of Pierre Potgieter in a striped scarf, looking up.",
-  badges: ["Web design", "Digital marketing"],
+  badges: ["Websites", "Ads & content"],
   locationLine: "Based in Cape Town,",
   locationLineTwo: "working globally.",
   globeTooltip: "Say hello",
 } as const;
 
 export const ABOUT = {
-  heading: "Creative web design",
-  intro: "Modern, custom-built websites and campaigns designed to make an impact.",
+  heading: "Websites that work",
+  intro: "Custom websites that look the part and bring in business.",
   paragraphs: [
-    "I'm Pierre, a Cape Town based web designer and marketer building websites that not only look great but feel intuitive. I combine design, development and marketing to create digital experiences that reflect the unique identity of every brand.",
-    "Every website I build is fully custom, never based on generic templates. With a marketing degree from IMM and my agency NextGenSolution, I approach every project, from startups to established brands, with the same commitment to craftsmanship, precision, and attention to detail.",
+    "I'm Pierre, a web designer and marketer from Cape Town. Most businesses end up hiring one person for the website and someone else for the ads, then spend months getting the two to talk to each other. I do both, so your site and your marketing are planned together from day one.",
+    "Every site I make is designed from scratch around your business, so it won't look like a template. And you deal with me directly, not an account manager. Send me a WhatsApp and you'll hear back the same day.",
   ],
 } as const;
 
@@ -46,35 +46,27 @@ export const SERVICES_HEADER = { line: "Design that", emphasis: "speaks." } as c
 export const SERVICES: readonly Service[] = [
   {
     number: "[01]",
-    title: "Web design & development",
+    title: "Websites",
     description:
-      "Fast, conversion-focused websites built to perform, from dealership inventory systems to recruitment platforms with live job feeds.",
+      "Fast, good-looking sites built around what your customers need to do, whether that's browsing stock, booking a table or ordering a pizza.",
     image: "/images/service-01.jpg",
     imageAlt: "Code editor open on a laptop screen.",
   },
   {
     number: "[02]",
-    title: "Marketing & content",
+    title: "Google Ads",
     description:
-      "Engaging content and marketing campaigns that grow your audience, strengthen your brand voice, and drive real results across every platform.",
-    image: "/images/service-02.jpg",
-    imageAlt: "Team planning a campaign around a table.",
+      "Ads that show up when people are already searching for what you sell. I set them up, watch them, and adjust so your budget goes where it works.",
+    image: "/images/service-03.jpg",
+    imageAlt: "Google logo in neon lights.",
   },
   {
     number: "[03]",
-    title: "Google Ads",
+    title: "Facebook & Instagram ads",
     description:
-      "Data-driven Google Ads campaigns that put your business in front of the right people at the right moment, maximising ROI and minimising wasted spend.",
-    image: "/images/service-03.jpg",
-    imageAlt: "Analytics dashboard with campaign performance charts.",
-  },
-  {
-    number: "[04]",
-    title: "Facebook & Instagram Ads",
-    description:
-      "Targeted Meta ad campaigns designed to build awareness, drive engagement, and convert your ideal audience into paying customers.",
+      "Ads that put your business in front of the right people in your area, and point them straight to your site or your WhatsApp.",
     image: "/images/service-04.jpg",
-    imageAlt: "Phone showing social media apps.",
+    imageAlt: "Facebook and Messenger app icons.",
   },
 ];
 
@@ -87,16 +79,40 @@ export interface Project {
 }
 
 export const PORTFOLIO_HEADER = {
-  line: "Crafting digital experiences that",
-  lineTwo: "bring brands to life.",
+  line: "A few things",
+  lineTwo: "I've built.",
 } as const;
 
 export const PROJECTS: readonly Project[] = [
   {
+    id: "majikpizza",
+    title: "Majik Pizza",
+    description:
+      "A website for a woodfired pizzeria in Van Riebeeckshof, with a searchable menu, live opening hours and one-tap ordering through Uber Eats or Mr D.",
+    image: "/work/majikpizza.jpg",
+    href: "https://majik-pizza-website.vercel.app",
+  },
+  {
+    id: "seabreeze",
+    title: "SeaBreeze Fish & Shell",
+    description:
+      "A site for a seafood restaurant on Bree Street, where a signature plate travels down the page as you scroll, with full menus and live table bookings.",
+    image: "/work/seabreeze.jpg",
+    href: "https://seabreeze-website.vercel.app",
+  },
+  {
+    id: "sychronpools",
+    title: "Sychron Pools",
+    description:
+      "A site for a Hout Bay pool builder covering new builds, renovations, repairs and maintenance, with enquiries that go straight to WhatsApp.",
+    image: "/work/sychronpools.jpg",
+    href: "https://sychron-pools.vercel.app",
+  },
+  {
     id: "kingcars",
     title: "King Cars",
     description:
-      "A dealership website with a live, searchable vehicle inventory, built so buyers can find their next car in seconds.",
+      "A website for a car dealership where buyers can search every car on the lot, by body type, make or price.",
     image: "/work/kingcars.jpg",
     href: "https://www.kingcars.co.za",
   },
@@ -104,7 +120,7 @@ export const PROJECTS: readonly Project[] = [
     id: "dongfeng",
     title: "Dongfeng South Africa",
     description:
-      "An automotive brand site for Dongfeng's electric line-up, built around bold model showcases and test drive bookings.",
+      "A site for Dongfeng's electric and hybrid range in Gqeberha, with model pages and test drive bookings.",
     image: "/work/dongfeng.jpg",
     href: "https://www.dongfengmotors.co.za",
   },
@@ -112,7 +128,7 @@ export const PROJECTS: readonly Project[] = [
     id: "jsm",
     title: "JSM Business Services",
     description:
-      "A recruitment platform with live job data, connecting top talent with employers across South Africa.",
+      "A recruitment site that pulls in live job listings, so candidates always see what's open.",
     image: "/work/jsm.jpg",
     href: "https://jsm-website.vercel.app",
   },
@@ -120,7 +136,7 @@ export const PROJECTS: readonly Project[] = [
     id: "brooks",
     title: "Brooks Hard Seltzer",
     description:
-      "Branding and packaging for a hard seltzer brand, brought to life in a fresh, flavour-led website.",
+      "The branding, packaging and website for a new hard seltzer brand.",
     image: "/work/brooks.jpg",
     href: "https://brooks-website.vercel.app",
   },
@@ -128,7 +144,7 @@ export const PROJECTS: readonly Project[] = [
     id: "nawtywater",
     title: "Nawty Water",
     description:
-      "A loud, playful brand and website for South Africa's boldest hard seltzer.",
+      "A bright, playful brand and website for a South African hard seltzer.",
     image: "/work/nawtywater.jpg",
     href: "https://nawtywater.vercel.app",
   },
@@ -136,26 +152,26 @@ export const PROJECTS: readonly Project[] = [
     id: "praat",
     title: "Praat",
     description:
-      "A speech to text app that runs entirely on your device. Press a shortcut, talk, and the words land right where your cursor is.",
+      "A speech-to-text app that runs entirely on your own computer. Press a shortcut, talk, and your words appear wherever you're typing.",
     image: "/work/praat.jpg",
   },
   {
     id: "angusbot",
     title: "Angus Bot",
     description:
-      "An AI-powered website builder. Describe what you want, and Angus builds it in seconds with no code and no templates.",
+      "An AI website builder: describe the site you want and Angus builds a first version in seconds.",
     image: "/work/angusbot.jpg",
   },
 ];
 
 export const CREDENTIALS = {
-  heading: "Education & Experience",
-  body: "A marketing degree from IMM and hands-on experience running my own agency mean every project is built on strategy, not guesswork.",
+  heading: "Why work with me",
+  body: "I studied marketing at IMM, then started my agency, NextGenSolution, to put it into practice. So I design every website around one question: how will this bring you customers?",
 } as const;
 
 export const CONTACT = {
   heading: "Contact",
-  body: "Have a project in mind? Let's talk. Share a few details, and I'll get back to you as soon as possible.",
+  body: "Tell me a bit about your business and what you need. I reply the same day, usually on WhatsApp.",
   // Floating background words, cycled in order (same list as the reference site).
   words: [
     "CONTACTO",
