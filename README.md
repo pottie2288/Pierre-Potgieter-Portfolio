@@ -45,6 +45,10 @@ Node (`fontkit`, `hersheytext`) plus the Archivo and Allura TTFs from google/fon
 
 Paste the JSON output into `src/content/vectors.ts`.
 
+Service images (`public/images/service-*.jpg`) are HTML mockups in `scripts/service-mockups/`,
+built from real project screenshots. Put the screenshots next to the HTML files and run
+`node rendermock.mjs` (Playwright) to re-render them at 2400×1350.
+
 ## Fonts
 
 The reference uses Atyp BL (Adobe Fonts, licensed). v2 uses Archivo (Google Fonts, OFL) with its width

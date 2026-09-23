@@ -27,7 +27,7 @@ export default function Services() {
                       src={service.image}
                       alt={service.imageAlt}
                       width={2400}
-                      height={1600}
+                      height={1350}
                       sizes="(max-width: 991px) 100vw, 71vw"
                       quality={85}
                       draggable={false}

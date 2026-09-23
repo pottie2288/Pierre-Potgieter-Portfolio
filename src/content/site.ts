@@ -49,24 +49,24 @@ export const SERVICES: readonly Service[] = [
     title: "Websites",
     description:
       "Fast, good-looking sites built around what your customers need to do, whether that's browsing stock, booking a table or ordering a pizza.",
-    image: "/images/service-01.jpg",
-    imageAlt: "Code editor open on a laptop screen.",
+    image: "/images/service-websites.jpg",
+    imageAlt: "Majik Pizza and SeaBreeze websites in browser windows, with the King Cars site on a phone.",
   },
   {
     number: "[02]",
     title: "Google Ads",
     description:
       "Ads that show up when people are already searching for what you sell. I set them up, watch them, and adjust so your budget goes where it works.",
-    image: "/images/service-03.jpg",
-    imageAlt: "Google logo in neon lights.",
+    image: "/images/service-google-ads.jpg",
+    imageAlt: "A sponsored search result for Pierre Potgieter, web designer in Cape Town, with his website behind it.",
   },
   {
     number: "[03]",
     title: "Facebook & Instagram ads",
     description:
       "Ads that put your business in front of the right people in your area, and point them straight to your site or your WhatsApp.",
-    image: "/images/service-04.jpg",
-    imageAlt: "Facebook and Messenger app icons.",
+    image: "/images/service-social-ads.jpg",
+    imageAlt: "Two phones showing a sponsored social post and a story ad for Pierre Potgieter's web design.",
   },
 ];
 

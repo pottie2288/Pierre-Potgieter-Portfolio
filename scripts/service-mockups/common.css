@@ -1,0 +1,13 @@
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Roboto:wght@400;500&display=block');
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1200px;height:675px;overflow:hidden}
+body{font-family:Archivo,sans-serif;position:relative}
+.browser{position:absolute;border-radius:12px;overflow:hidden;background:#fff;box-shadow:0 40px 80px -20px rgba(8,9,18,.35),0 12px 24px -8px rgba(8,9,18,.18)}
+.browser .bar{height:30px;background:#f1f0ef;display:flex;align-items:center;gap:6px;padding:0 12px;border-bottom:1px solid #e3e2e1}
+.browser .bar i{width:10px;height:10px;border-radius:50%;background:#d6d4d2;display:block}
+.browser .bar .url{margin-left:14px;height:16px;flex:0 0 38%;border-radius:8px;background:#e4e3e1;font:500 9px/16px Archivo;color:#8a8886;padding-left:10px;letter-spacing:.02em}
+.browser img{display:block;width:100%}
+.phone{position:absolute;border-radius:46px;background:#0c0d12;padding:10px;box-shadow:0 50px 90px -25px rgba(8,9,18,.45),0 14px 28px -10px rgba(8,9,18,.25)}
+.phone .screen{position:relative;width:100%;height:100%;border-radius:37px;overflow:hidden;background:#fff}
+.phone .island{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:34%;height:22px;border-radius:12px;background:#0c0d12;z-index:5}
+.phone .screen>img{width:100%;height:100%;object-fit:cover;object-position:top;display:block}
