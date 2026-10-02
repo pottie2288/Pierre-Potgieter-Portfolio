@@ -133,34 +133,12 @@ export const PROJECTS: readonly Project[] = [
     href: "https://jsm-website.vercel.app",
   },
   {
-    id: "brooks",
-    title: "Brooks Hard Seltzer",
-    description:
-      "The branding, packaging and website for a new hard seltzer brand.",
-    image: "/work/brooks.jpg",
-    href: "https://brooks-website.vercel.app",
-  },
-  {
-    id: "nawtywater",
-    title: "Nawty Water",
-    description:
-      "A bright, playful brand and website for a South African hard seltzer.",
-    image: "/work/nawtywater.jpg",
-    href: "https://nawtywater.vercel.app",
-  },
-  {
     id: "praat",
     title: "Praat",
     description:
       "A speech-to-text app that runs entirely on your own computer. Press a shortcut, talk, and your words appear wherever you're typing.",
     image: "/work/praat.jpg",
-  },
-  {
-    id: "angusbot",
-    title: "Angus Bot",
-    description:
-      "An AI website builder: describe the site you want and Angus builds a first version in seconds.",
-    image: "/work/angusbot.jpg",
+    href: "https://praat-one.vercel.app",
   },
 ];
 
