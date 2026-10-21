@@ -83,31 +83,9 @@ export const PORTFOLIO_HEADER = {
   lineTwo: "I've built.",
 } as const;
 
+// Carousel order. Pierre wants King Cars, Dongfeng and SeaBreeze to always be
+// the first three, in that order. No "concept" labels on any project.
 export const PROJECTS: readonly Project[] = [
-  {
-    id: "majikpizza",
-    title: "Majik Pizza",
-    description:
-      "A website for a woodfired pizzeria in Van Riebeeckshof, with a searchable menu, live opening hours and one-tap ordering through Uber Eats or Mr D.",
-    image: "/work/majikpizza.jpg",
-    href: "https://majik-pizza-website.vercel.app",
-  },
-  {
-    id: "seabreeze",
-    title: "SeaBreeze Fish & Shell",
-    description:
-      "A site for a seafood restaurant on Bree Street, where a signature plate travels down the page as you scroll, with full menus and live table bookings.",
-    image: "/work/seabreeze.jpg",
-    href: "https://seabreeze-website.vercel.app",
-  },
-  {
-    id: "sychronpools",
-    title: "Sychron Pools",
-    description:
-      "A site for a Hout Bay pool builder covering new builds, renovations, repairs and maintenance, with enquiries that go straight to WhatsApp.",
-    image: "/work/sychronpools.jpg",
-    href: "https://sychron-pools.vercel.app",
-  },
   {
     id: "kingcars",
     title: "King Cars",
@@ -125,12 +103,52 @@ export const PROJECTS: readonly Project[] = [
     href: "https://www.dongfengmotors.co.za",
   },
   {
+    id: "seabreeze",
+    title: "SeaBreeze Fish & Shell",
+    description:
+      "A site for a seafood restaurant on Bree Street, where a signature plate travels down the page as you scroll, with full menus and live table bookings.",
+    image: "/work/seabreeze.jpg",
+    href: "https://seabreeze-website.vercel.app",
+  },
+  {
+    id: "surronsa",
+    title: "Surron SA",
+    description:
+      "A redesign of Surron SA's website for their electric dirt bikes, with a scroll-driven hero cut from Surron's own film, full model pages and a dealer finder.",
+    image: "/work/surronsa.jpg",
+    href: "https://surron-sa.vercel.app",
+  },
+  {
+    id: "majikpizza",
+    title: "Majik Pizza",
+    description:
+      "A website for a woodfired pizzeria in Van Riebeeckshof, with a searchable menu, live opening hours and one-tap ordering through Uber Eats or Mr D.",
+    image: "/work/majikpizza.jpg",
+    href: "https://majik-pizza-website.vercel.app",
+  },
+  {
+    id: "sychronpools",
+    title: "Sychron Pools",
+    description:
+      "A site for a Hout Bay pool builder covering new builds, renovations, repairs and maintenance, with enquiries that go straight to WhatsApp.",
+    image: "/work/sychronpools.jpg",
+    href: "https://sychron-pools.vercel.app",
+  },
+  {
     id: "jsm",
     title: "JSM Business Services",
     description:
       "A recruitment site that pulls in live job listings, so candidates always see what's open.",
     image: "/work/jsm.jpg",
     href: "https://jsm-website.vercel.app",
+  },
+  {
+    id: "pureenergy",
+    title: "Pure Energy",
+    description:
+      "A website for Pure Energy, an energy drink brand. Spin through a 3D carousel of six cans as you scroll, then read each flavour's ingredients and nutrition off the back of the can.",
+    image: "/work/pureenergy.jpg",
+    href: "https://pure-energy-concept.vercel.app",
   },
   {
     id: "praat",
