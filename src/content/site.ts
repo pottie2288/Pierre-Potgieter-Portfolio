@@ -143,6 +143,14 @@ export const PROJECTS: readonly Project[] = [
     href: "https://jsm-website.vercel.app",
   },
   {
+    id: "fs60",
+    title: "FS 60P",
+    description:
+      "A scroll-driven 3D website for the FS 60P automatic watch. The watch turns and moves through the page as you scroll, with real-time lighting and particle effects.",
+    image: "/work/fs60.jpg",
+    href: "https://fs60-watch.vercel.app",
+  },
+  {
     id: "pureenergy",
     title: "Pure Energy",
     description:
